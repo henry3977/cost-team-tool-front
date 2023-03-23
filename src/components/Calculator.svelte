@@ -142,7 +142,7 @@
                 <input type="number" id="building-area-{index}"
                     bind:value={$costs[index].plan.buildingArea}
                     class="w-28 px-2 mt-1 text-right                     
-                        text-purple-700 text-lg
+                        text-cyan-500 text-lg
                         border-b focus:outline-none focus:border-b focus:border-gray-400">
             </div>
             <div class="flex justify-between items-end h-[32px]">
@@ -151,7 +151,7 @@
                     <input type="number" id="site-area-{index}"
                         bind:value={$costs[index].plan.siteArea}
                         class="w-28 px-2 mt-1 text-right                     
-                            text-purple-700 text-lg
+                            text-cyan-500 text-lg
                             border-b focus:outline-none focus:border-b focus:border-gray-400">
                 {/if}
             </div>
@@ -161,7 +161,7 @@
                     <input type="number" id="weeks-{index}"
                         bind:value={$costs[index].plan.weeks}
                         class="w-28 px-2 mt-1 text-right                     
-                            text-purple-700 text-lg
+                            text-cyan-500 text-lg
                             border-b focus:outline-none focus:border-b focus:border-gray-400">
                 {/if}
             </div>
