@@ -3,14 +3,51 @@
     import { costs } from '../stores.js';
     import Calculator from '../components/Calculator.svelte';
     import EditCost from '../components/EditCost.svelte';
+    import EditDefaultUnitPrice from '../components/EditDefaultUnitPrice.svelte';
 
-    let selectedIndex= null;
+    let setDefaultUnitPrice = false;
+    let selectedIndex = null;
+    let defaultUnitPrice = {
+        support: {
+            ldc: 8000000,
+            contract: 3540000,
+            maxRate:104.3
+        },
+        contract: {
+            minRate: 150,
+            maxRate: 165,
+            electMaxRate: 120
+        },
+        new: {
+            building: 991968,
+            site: 178787,
+            elect: 580000
+        },
+        major: {
+            building: 732758.87,
+            site: 227171.45,
+            elect: 300000
+        },
+        store: {
+            building: 830734,
+            site: 0,
+            elect: 300000
+        },
+        lease: {
+            building: 0,
+            site: 0,
+            elect: 0,
+            min: 936944,
+            max: 1516164
+        }
+    }
     // let projects= [{
     //     name: '새 프로젝트',
     //     costs: []
     // }];
     onMount(() => {
-		newCalculator();
+        if (localStorage.getItem('defaultUnitPrice') === null) localStorage.setItem('defaultUnitPrice', JSON.stringify(defaultUnitPrice));
+		newCalculator(defaultUnitPrice);
 	});
 
     function newCalculator() {
@@ -43,7 +80,13 @@
     }
 
     function deleteCosts(event) {
-        if (confirm('삭제할거야?')) {
+        let result = true;
+        if ($costs[event.detail.index].plan.buildingArea 
+            || $costs[event.detail.index].plan.siteArea 
+            || $costs[event.detail.index].plan.weeks) {
+            result = confirm('삭제할거야?');
+        } 
+        if (result) {
             $costs.splice(event.detail.index, 1);
             $costs = $costs;
         }
@@ -64,23 +107,26 @@
 </script>
 
 <div class="h-screen">
-    <div class="bg-stone-300 ring-[0.5px] ring-stone-400 h-10 px-2 flex justify-start items-center gap-1">
+    <div class="h-10 px-2 flex justify-end items-center gap-1 border-b">
 
-        <!-- <button class="align-middle px-4 m-1 text-gray-700 hover:bg-stone-200 active:bg-stone-100 rounded-lg"
+        <button class="px-4 py-1 rounded-lg
+            text-gray-700 hover:bg-gray-100 active:bg-gray-200"
             on:click={newCalculator}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                <path fill-rule="evenodd" d="M6.32 1.827a49.255 49.255 0 0111.36 0c1.497.174 2.57 1.46 2.57 2.93V19.5a3 3 0 01-3 3H6.75a3 3 0 01-3-3V4.757c0-1.47 1.073-2.756 2.57-2.93zM7.5 11.25a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H8.25a.75.75 0 01-.75-.75v-.008zm.75 1.5a.75.75 0 00-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H8.25zm-.75 3a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H8.25a.75.75 0 01-.75-.75v-.008zm.75 1.5a.75.75 0 00-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 00.75-.75V18a.75.75 0 00-.75-.75H8.25zm1.748-6a.75.75 0 01.75-.75h.007a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75h-.007a.75.75 0 01-.75-.75v-.008zm.75 1.5a.75.75 0 00-.75.75v.008c0 .414.335.75.75.75h.007a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75h-.007zm-.75 3a.75.75 0 01.75-.75h.007a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75h-.007a.75.75 0 01-.75-.75v-.008zm.75 1.5a.75.75 0 00-.75.75v.008c0 .414.335.75.75.75h.007a.75.75 0 00.75-.75V18a.75.75 0 00-.75-.75h-.007zm1.754-6a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75h-.008a.75.75 0 01-.75-.75v-.008zm.75 1.5a.75.75 0 00-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75h-.008zm-.75 3a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75h-.008a.75.75 0 01-.75-.75v-.008zm.75 1.5a.75.75 0 00-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 00.75-.75V18a.75.75 0 00-.75-.75h-.008zm1.748-6a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75h-.008a.75.75 0 01-.75-.75v-.008zm.75 1.5a.75.75 0 00-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75h-.008zm-8.25-6A.75.75 0 018.25 6h7.5a.75.75 0 01.75.75v.75a.75.75 0 01-.75.75h-7.5a.75.75 0 01-.75-.75v-.75zm9 9a.75.75 0 00-1.5 0V18a.75.75 0 001.5 0v-2.25z" clip-rule="evenodd" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
             </svg>
-        </button> -->
-
-        <!-- {#each projects as project }
-            <div class="px-4 py-1 rounded-lg cursor-pointer text-sm bg-stone-100">
-                {project.name}
-            </div>
-        {/each} -->
+        </button>
+        
         <button class="px-4 py-1 rounded-lg cursor-pointer 
-            bg-stone-200 hover:bg-slate-100 active:bg-slate-50"
-            on:click={newCalculator}>+</button>
+            text-gray-700 hover:bg-gray-100 active:bg-gray-200"
+            class:bg-gray-200={setDefaultUnitPrice}
+            on:click={() => setDefaultUnitPrice = !setDefaultUnitPrice }>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        </button>
+            
 
     </div>
     <div class="flex h-[calc(100vh-2.5rem)]">
@@ -95,6 +141,10 @@
         {#if selectedIndex !== null}
             <EditCost index={selectedIndex}
                 on:pleaseCloseEditCost={closeEditCost}/>
+        {/if}
+        {#if setDefaultUnitPrice}
+            <EditDefaultUnitPrice 
+                on:closeEditDefaultUnitPrice={() => {setDefaultUnitPrice = false }}/>
         {/if}
     </div>
 </div>

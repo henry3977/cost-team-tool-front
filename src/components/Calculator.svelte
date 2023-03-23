@@ -1,60 +1,30 @@
 <script>
-    import { afterUpdate } from 'svelte';
+    import { onMount, afterUpdate } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
     import { costs } from '../stores.js';
 
 	const dispatch = createEventDispatcher();
     export let index;
     export let selectedIndex;
-    export let defaultUnitPrice = {
-        support: {
-            contract: 3540000,
-            ldc: 8000000,
-            maxRate:104.3
-        },
-        contract: {
-            minRate: 150,
-            maxRate: 165,
-            electMaxRate: 120
-        },
-        new: {
-            building: 991968,
-            site: 178787,
-            elect: 580000
-        },
-        major: {
-            building: 732758.87,
-            site: 227171.45,
-            elect: 300000
-        },
-        store: {
-            building: 830734,
-            site: 0,
-            elect: 300000
-        },
-        lease: {
-            building: 0,
-            site: 0,
-            elect: 0,
-            min: 936944,
-            max: 1516164
-        }
-    }
+    export let defaultUnitPrice;
+
+    onMount(() => {
+        defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
+        if ($costs[index].unitPrice.support === undefined) $costs[index].unitPrice.support = defaultUnitPrice.support;
+        if ($costs[index].unitPrice.contract === undefined) $costs[index].unitPrice.contract = defaultUnitPrice.contract;
+        if ($costs[index].unitPrice.construction === undefined) $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
+	});
 
     afterUpdate(() => {
         if ($costs[index].plan.buildingArea || $costs[index].plan.siteArea || $costs[index].plan.weeks) calculators();
     });
 
     $: constructionTotal = $costs[index].construction.building + $costs[index].construction.site;
-    $: contractMinTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.min, 0);
-    $: contractMaxTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.max, 0);
+    $: contractMinTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.min, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.min, 0);
+    $: contractMaxTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.max, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.max, 0);
     $: riskTotal = $costs[index].risks.reduce((a, b) => a + b.riskAllowance, 0);
 
     function calculators() {
-        if ($costs[index].unitPrice.support === undefined) $costs[index].unitPrice.support = defaultUnitPrice.support;
-        if ($costs[index].unitPrice.contract === undefined) $costs[index].unitPrice.contract = defaultUnitPrice.contract;
-        if ($costs[index].unitPrice.construction === undefined) $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
-        
         $costs[index].support.min = 0;
         $costs[index].support.max = 0;
         if ($costs[index].plan.type !== 'lease') {
@@ -93,8 +63,8 @@
                 });
             }
         }
-        let costContractMinTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.min, 0);
-        let costContractMaxTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.max, 0);
+        let costContractMinTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.min, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.min, 0);
+        let costContractMaxTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.max, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.max, 0);
 
         if ($costs[index].plan.type === 'lease') $costs[index].risks = [];
         if ($costs[index].plan.type !== 'lease' && $costs[index].risks.length === 0) {
@@ -104,14 +74,6 @@
                 impact: 3,
                 min: Math.round(costContractMinTotal * 0.1),
                 max: Math.round(costContractMaxTotal * 0.1),
-                riskAllowance: 0
-            });
-            pushRisk({
-                desc: '날씨로 인한 지연',
-                probability: 2,
-                impact: 2,
-                min: 3000000,
-                max: 6000000,
                 riskAllowance: 0
             });
         } 
@@ -156,8 +118,7 @@
 
 </script>
 
-<div class="shrink-0 w-full lg:w-1/3 2xl:w-1/5 border-r hover:shadow-xl "
-    class:bg-gray-50={selectedIndex == index}>
+<div class="shrink-0 w-full lg:w-1/3 2xl:w-1/5 border-r hover:shadow-xl">
     <div class="p-4 relative">
         <button class="cursor-pointer absolute top-2 right-2 p-1 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-full"
             on:click={pleaseDeleteMe}>
@@ -169,42 +130,39 @@
             <select class="appearance-none"
                 bind:value={$costs[index].plan.type}
                 on:change={selectdType}>
-                <option value="new">New</option>
-                <option value="major">Major</option>
-                <option value="store">Store</option>
-                <option value="lease">Lease</option>
+                <option value="new">신축</option>
+                <option value="major">개축</option>
+                <option value="store">상가</option>
+                <option value="lease">임대</option>
             </select>
         </div>
         <div class="flex flex-col gap-y-1 mt-4 text-sm font-semibold ">
-            <div class="flex justify-between items-center">
-                <label for="building-area-{index}">Building Area</label>
+            <div class="flex justify-between items-end">
+                <label for="building-area-{index}">건축 면적</label>
                 <input type="number" id="building-area-{index}"
                     bind:value={$costs[index].plan.buildingArea}
-                    class="rounded-md shadow-sm
-                        w-32 px-2 py-1 mt-1 text-right
-                        ring-1 ring-inset ring-gray-200
-                        focus:outline-none focus:ring-1 focus:ring-gray-700">
+                    class="w-28 px-2 mt-1 text-right                     
+                        text-purple-700 text-lg
+                        border-b focus:outline-none focus:border-b focus:border-gray-400">
             </div>
-            <div class="flex justify-between items-center h-[32px]">
-                <label for="site-area-{index}">Site Area</label>
+            <div class="flex justify-between items-end h-[32px]">
+                <label for="site-area-{index}">부지 면적</label>
                 {#if $costs[index].plan.type === 'new' || $costs[index].plan.type === 'major'}
                     <input type="number" id="site-area-{index}"
                         bind:value={$costs[index].plan.siteArea}
-                        class="rounded-md shadow-sm
-                            w-32 px-2 py-1 mt-1 text-right
-                            ring-1 ring-inset ring-gray-200 
-                            focus:outline-none focus:ring-1 focus:ring-gray-700">
+                        class="w-28 px-2 mt-1 text-right                     
+                            text-purple-700 text-lg
+                            border-b focus:outline-none focus:border-b focus:border-gray-400">
                 {/if}
             </div>
-            <div class="flex justify-between items-center h-[32px]">
-                <label for="weeks-{index}">Weeks</label>
+            <div class="flex justify-between items-end h-[32px]">
+                <label for="weeks-{index}">공사 기간(주)</label>
                 {#if $costs[index].plan.type !== 'lease'}
                     <input type="number" id="weeks-{index}"
                         bind:value={$costs[index].plan.weeks}
-                        class="rounded-md shadow-sm
-                            w-32 px-2 py-1 mt-1 text-right
-                            ring-1 ring-inset ring-gray-200 
-                            focus:outline-none focus:ring-1 focus:ring-gray-700">
+                        class="w-28 px-2 mt-1 text-right                     
+                            text-purple-700 text-lg
+                            border-b focus:outline-none focus:border-b focus:border-gray-400">
                 {/if}
             </div>
             <div class="mt-1 flex items-center justify-end h-[20px]">
