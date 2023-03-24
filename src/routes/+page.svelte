@@ -41,10 +41,7 @@
             max: 1516164
         }
     }
-    // let projects= [{
-    //     name: '새 프로젝트',
-    //     costs: []
-    // }];
+
     onMount(() => {
         if (localStorage.getItem('defaultUnitPrice') === null) localStorage.setItem('defaultUnitPrice', JSON.stringify(defaultUnitPrice));
 		newCalculator(defaultUnitPrice);
@@ -73,7 +70,11 @@
                 defaults: [],
                 customs: []
             },
-            risks: [],
+            risk: {
+                contract: {},
+                customs: []
+            },
+
             minTotal: 0,
             maxTotal: 0
         }]);

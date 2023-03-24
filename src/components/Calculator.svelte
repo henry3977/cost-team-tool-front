@@ -22,7 +22,7 @@
     $: constructionTotal = $costs[index].construction.building + $costs[index].construction.site;
     $: contractMinTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.min, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.min, 0);
     $: contractMaxTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.max, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.max, 0);
-    $: riskTotal = $costs[index].risks.reduce((a, b) => a + b.riskAllowance, 0);
+    $: riskTotal = getRiskTotal($costs[index].risk);
 
     function calculators() {
         $costs[index].support.min = 0;
@@ -66,38 +66,41 @@
         let costContractMinTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.min, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.min, 0);
         let costContractMaxTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.max, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.max, 0);
 
-        if ($costs[index].plan.type === 'lease') $costs[index].risks = [];
-        if ($costs[index].plan.type !== 'lease' && $costs[index].risks.length === 0) {
-            pushRisk({
+        if ($costs[index].plan.type === 'lease') $costs[index].risk.contract = {};
+        if ($costs[index].plan.type !== 'lease' && Object.keys($costs[index].risk.contract).length === 0) {
+            $costs[index].risk.contract = {
+                id: 'contract',
                 desc: '도급 계약 관리',
                 probability: 3,
                 impact: 3,
                 min: Math.round(costContractMinTotal * 0.1),
                 max: Math.round(costContractMaxTotal * 0.1),
-                riskAllowance: 0
-            });
+                riskAllowance: Math.round( ((Math.round(costContractMinTotal * 0.1) + Math.round(costContractMaxTotal * 0.1)) / 2) * ((9) / 10) )
+            };
+
         } 
-        if ($costs[index].plan.type !== 'lease' && $costs[index].risks.length > 0) {
-            $costs[index].risks[0].min = Math.round(costContractMinTotal * 0.1);
-            $costs[index].risks[0].max = Math.round(costContractMaxTotal * 0.1);
+        if (Object.keys($costs[index].risk.contract).length !== 0) {
+            $costs[index].risk.contract.min = Math.round(costContractMinTotal * 0.1);
+            $costs[index].risk.contract.max = Math.round(costContractMaxTotal * 0.1);
+            $costs[index].risk.contract.riskAllowance = Math.round(
+                (($costs[index].risk.contract.min + $costs[index].risk.contract.max) / 2) * (($costs[index].risk.contract.probability * $costs[index].risk.contract.impact) / 10) );
         }
-        $costs[index].risks.forEach(risk => {
+        $costs[index].risk.customs.forEach(risk => {
             risk.riskAllowance = Math.round( ((risk.min + risk.max) / 2) * ((risk.probability * risk.impact) / 10) );
         });
 
         $costs[index].minTotal = 0;
         $costs[index].maxTotal = 0;
         $costs[index].minTotal = $costs[index].support.min + costContractMinTotal;
-        $costs[index].maxTotal = $costs[index].support.max + costContractMaxTotal + $costs[index].risks.reduce((a, b) => a + b.riskAllowance, 0);
+        $costs[index].maxTotal = $costs[index].support.max + costContractMaxTotal + getRiskTotal($costs[index].risk);
         if (!$costs[index].plan.allContract) {
             $costs[index].minTotal = $costs[index].minTotal + $costs[index].construction.building + $costs[index].construction.site;
             $costs[index].maxTotal = $costs[index].maxTotal + $costs[index].construction.building + $costs[index].construction.site;
         }
     }
 
-    function pushRisk(risk) {
-        risk.id = $costs[index].risks.length + 1;
-        $costs[index].risks.push(risk);
+    function getRiskTotal(risk) {
+        return risk.customs.reduce((a, b) => a + b.riskAllowance, 0) + risk.contract.riskAllowance ? risk.contract.riskAllowance : 0;
     }
 
     function selectdType() {
@@ -169,7 +172,7 @@
                 {#if $costs[index].plan.type !== 'lease'}
                     <input type="checkbox" id="all-contract-{index}" class="w-4 h-4"
                         bind:checked={$costs[index].plan.allContract}> 
-                    <label for="all-contract-{index}" class="ml-2">All Contract</label>
+                    <label for="all-contract-{index}" class="ml-2">전체도급</label>
                 {/if}
             </div>
         </div>
@@ -240,7 +243,7 @@
                     {#each $costs[index].contract.customs as contract}
                         <div class="flex justify-between text-gray-500">
                             <div>{contract.name}</div>
-                            <div>{contract.min === 0 ? '-' : `₩ ${contract.min.toLocaleString()}`}</div>
+                            <div>{contract.min === null ? '-' : `₩ ${contract.min.toLocaleString()}`}</div>
                         </div>
                     {/each}
                 </div>
@@ -262,7 +265,7 @@
                     {#each $costs[index].contract.customs as contract}
                         <div class="flex justify-between text-gray-500">
                             <div>{contract.name}</div>
-                            <div>{contract.max === 0 ? '-' : `₩ ${contract.max.toLocaleString()}`}</div>
+                            <div>{contract.max === null ? '-' : `₩ ${contract.max.toLocaleString()}`}</div>
                         </div>
                     {/each}
                 </div>
@@ -275,7 +278,13 @@
                         </div>
                         <div>{riskTotal === 0 ? '-' : `₩ ${riskTotal.toLocaleString()}`}</div>
                     </div>
-                    {#each $costs[index].risks as risk}
+                    {#if Object.keys($costs[index].risk.contract).length !== 0}
+                        <div class="flex justify-between text-gray-500">
+                            <div>{$costs[index].risk.contract.desc}</div>
+                            <div>{$costs[index].risk.contract.riskAllowance === 0 ? '-' : `₩ ${$costs[index].risk.contract.riskAllowance.toLocaleString()}`}</div>
+                        </div>
+                    {/if}
+                    {#each $costs[index].risk.customs as risk}
                         <div class="flex justify-between text-gray-500">
                             <div>{risk.desc}</div>
                             <div>{risk.riskAllowance === 0 ? '-' : `₩ ${risk.riskAllowance.toLocaleString()}`}</div>
