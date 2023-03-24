@@ -56,26 +56,31 @@
         {#if $costs[index].plan.type !== 'lease'}
             <div class="py-4">
                 <h3 class="font-semibold">Support</h3>
-                <div class="mt-2 flex justify-between items-end">
-                    <label class="ml-1 text-xs" for="support-amount">LDC 공사</label>
-                    <div>
-                        <input type="number"
-                            id="support-amount"
-                            class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm"
-                            bind:value={$costs[index].unitPrice.support.ldc}>
-                        <span class="text-xs">₩</span>
+                
+                {#if $costs[index].plan.allContract}
+                    <div class="mt-2 flex justify-between items-end">
+                        <label class="ml-1 text-xs" for="support-amount">전체도급</label>
+                        <div>
+                            <input type="number"
+                                id="support-amount"
+                                class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm"
+                                bind:value={$costs[index].unitPrice.support.contract}>
+                            <span class=" text-xs">₩</span>
+                        </div>
                     </div>
-                </div>
-                <div class="mt-2 flex justify-between items-end">
-                    <label class="ml-1 text-xs" for="support-amount">전체도급</label>
-                    <div>
-                        <input type="number"
-                            id="support-amount"
-                            class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm"
-                            bind:value={$costs[index].unitPrice.support.contract}>
-                        <span class=" text-xs">₩</span>
+                {:else}
+                    <div class="mt-2 flex justify-between items-end">
+                        <label class="ml-1 text-xs" for="support-amount">LDC 공사</label>
+                        <div>
+                            <input type="number"
+                                id="support-amount"
+                                class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm"
+                                bind:value={$costs[index].unitPrice.support.ldc}>
+                            <span class="text-xs">₩</span>
+                        </div>
                     </div>
-                </div>
+                {/if}
+
                 <div class="mt-1 flex justify-between items-end">
                     <label class="ml-1 text-xs" for="support-max-rate">최대비용 증가율</label>
                     <div>
