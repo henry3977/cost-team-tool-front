@@ -127,33 +127,35 @@
                         </div>
                     </div>
                 </div>
-        
-                <div class="mb-2">
-                    <input type="text" 
-                        class="px-1 h-5 w-[249px] text-xs ring-[0.5px] ring-gray-400 rounded-sm read-only:bg-gray-200"
-                        value="도급공사 증가율"
-                        readonly>
-                    <div class="mt-1 flex justify-between items-end">
-                        <label class="ml-1  text-xs" for="rate-of-increase-min">최저</label>
-                        <div>
-                            <input type="number"
-                                id="rate-of-increase-min"
-                                bind:value={$costs[index].unitPrice.contract.minRate}
-                                class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm">
-                            <span class=" text-xs">%</span>
+
+                {#if $costs[index].plan.allContract}
+                    <div class="mb-2">
+                        <input type="text" 
+                            class="px-1 h-5 w-[249px] text-xs ring-[0.5px] ring-gray-400 rounded-sm read-only:bg-gray-200"
+                            value="도급공사 증가율"
+                            readonly>
+                        <div class="mt-1 flex justify-between items-end">
+                            <label class="ml-1  text-xs" for="rate-of-increase-min">최저</label>
+                            <div>
+                                <input type="number"
+                                    id="rate-of-increase-min"
+                                    bind:value={$costs[index].unitPrice.contract.minRate}
+                                    class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm">
+                                <span class=" text-xs">%</span>
+                            </div>
+                        </div>
+                        <div class="mt-1 flex justify-between items-end">
+                            <label class="ml-1  text-xs" for="rate-of-increase-max">최대</label>
+                            <div>
+                                <input type="number"
+                                    id="rate-of-increase-max"
+                                    bind:value={$costs[index].unitPrice.contract.maxRate}
+                                    class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm">
+                                <span class=" text-xs">%</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="mt-1 flex justify-between items-end">
-                        <label class="ml-1  text-xs" for="rate-of-increase-max">최대</label>
-                        <div>
-                            <input type="number"
-                                id="rate-of-increase-max"
-                                bind:value={$costs[index].unitPrice.contract.maxRate}
-                                class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm">
-                            <span class=" text-xs">%</span>
-                        </div>
-                    </div>
-                </div>
+                {/if}
 
                 {#each $costs[index].contract.customs as contract, i}
                     <div class="mb-2">
