@@ -91,6 +91,7 @@
             $costs.splice(event.detail.index, 1);
             $costs = $costs;
         }
+        selectedIndex = null;
     }
 
     function editCost(event) {
