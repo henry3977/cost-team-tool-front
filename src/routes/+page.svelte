@@ -44,7 +44,7 @@
 
     onMount(() => {
         if (localStorage.getItem('defaultUnitPrice') === null) localStorage.setItem('defaultUnitPrice', JSON.stringify(defaultUnitPrice));
-		newCalculator(defaultUnitPrice);
+		newCalculator();
 	});
 
     function newCalculator() {
