@@ -6,7 +6,7 @@
     }
 </script>
 
-<div class="basis-72 p-3 border-l overflow-y-scroll">
+<div class="shrink-0 w-72 p-3 border-l overflow-y-scroll">
 
     <h2 class="text-lg font-bold">단가 설정</h2>
     <div class="divide-y-[0.5px] divide-gray-400">
@@ -33,7 +33,7 @@
                 </div>
             </div>
             <div class="mt-1 flex justify-between items-end">
-                <label class="ml-1  text-xs" for="support-max-rate">최대비용 증가율</label>
+                <label class="ml-1 text-xs" for="support-max-rate">최대비용 증가율</label>
                 <div>
                     <input type="number"
                         id="support-max-rate"

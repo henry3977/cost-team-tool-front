@@ -25,6 +25,12 @@
     $: riskTotal = getRiskTotal($costs[index].risk);
 
     function calculators() {
+        defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
+        if ($costs[index].unitPrice.support === undefined) $costs[index].unitPrice.support = defaultUnitPrice.support;
+        if ($costs[index].unitPrice.contract === undefined) $costs[index].unitPrice.contract = defaultUnitPrice.contract;
+        if ($costs[index].unitPrice.construction === undefined) $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
+
+        $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
         $costs[index].support.min = 0;
         $costs[index].support.max = 0;
         if ($costs[index].plan.type !== 'lease') {
@@ -97,15 +103,17 @@
             $costs[index].minTotal = $costs[index].minTotal + $costs[index].construction.building + $costs[index].construction.site;
             $costs[index].maxTotal = $costs[index].maxTotal + $costs[index].construction.building + $costs[index].construction.site;
         }
+        pleaseSetProjectCosts();
     }
 
     function getRiskTotal(risk) {
         return risk.customs.reduce((a, b) => a + b.riskAllowance, 0) + risk.contract.riskAllowance ? risk.contract.riskAllowance : 0;
     }
 
-    function selectdType() {
-        $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
-    }
+    // function selectdType() {
+    //     console.log('selectdType')
+    //     $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
+    // }
 
     function pleaseDeleteMe() {
         dispatch('pleaseDeleteMe', {
@@ -119,27 +127,38 @@
 		});
     }
 
+    function pleaseSetProjectCosts() {
+        dispatch('pleaseSetProjectCosts');
+    }
+
 </script>
 
-<div class="shrink-0 w-full lg:w-1/3 2xl:w-1/5 border-r hover:shadow-xl">
+<div class="shrink-0 w-80 border-r overflow-auto">
     <div class="p-4 relative">
-        <button class="cursor-pointer absolute top-2 right-2 p-1 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-full"
+        <button class="cursor-pointer absolute top-2 right-2 p-1 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-full pdf-hide"
             on:click={pleaseDeleteMe}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
                 <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd" />
             </svg>              
         </button>
-        <div class="text-2xl font-semibold text-center">
-            <select class="appearance-none"
-                bind:value={$costs[index].plan.type}
-                on:change={selectdType}>
+        <div class="text-center text-2xl font-semibold">
+            <select class="appearance-none text-2xl font-semibold"
+                bind:value={$costs[index].plan.type}>
                 <option value="new">신축</option>
                 <option value="major">개축</option>
                 <option value="store">상가</option>
                 <option value="lease">임대</option>
             </select>
         </div>
-        <div class="flex flex-col gap-y-1 mt-4 text-sm font-semibold ">
+        <div class="flex flex-col gap-y-1 mt-4 text-sm font-semibold">
+            <div class="flex justify-between items-end">
+                <label for="building-area-{index}">비고</label>
+                <input type="text" id="building-area-{index}"
+                    bind:value={$costs[index].plan.comment}
+                    class="px-2 mt-1 text-right                     
+                        text-cyan-500 text-lg
+                        border-b focus:outline-none focus:border-b focus:border-gray-400">
+            </div>
             <div class="flex justify-between items-end">
                 <label for="building-area-{index}">건축 면적</label>
                 <input type="number" id="building-area-{index}"
@@ -179,8 +198,7 @@
     </div>
     {#if $costs[index].plan.buildingArea || $costs[index].plan.siteArea || $costs[index].plan.weeks}
         <div class="p-4 mt-4">
-            <div class="flex flex-col gap-y-3.5 text-sm h-[calc(100vh-2.5rem-260px)]">
-
+            <div class="flex flex-col gap-y-3.5 text-sm">
                 <div class="font-semibold">
                     <div class="flex justify-between text-cyan-500 text-lg">
                         <div>MIN</div>
@@ -195,16 +213,14 @@
                 <div>
                     <div class="flex justify-between font-semibold">
                         <div>Support
-                            <span class="rounded-md px-1 ml-1
-                                text-xs text-cyan-500 ring-1 ring-cyan-500">MIN</span>
+                            <span class="px-1 text-xs text-cyan-500 ring-cyan-500">MIN</span>
                         </div>
                         <div>{$costs[index].support.min === 0 ? '-' : `₩ ${$costs[index].support.min.toLocaleString()}`}</div>
                         
                     </div>
                     <div class="flex justify-between font-semibold">
                         <div>Support
-                            <span class="rounded-md px-1 ml-1
-                                text-xs text-purple-500 ring-1 ring-purple-500">MAX</span>
+                            <span class="px-1 text-xs text-purple-500 ring-purple-500">MAX</span>
                         </div>
                         <div>{$costs[index].support.max === 0 ? '-' : `₩ ${$costs[index].support.max.toLocaleString()}`}</div>
                         
@@ -229,8 +245,7 @@
                 <div>
                     <div class="flex justify-between font-semibold">
                         <div>Contract
-                            <span class="rounded-md px-1 ml-1
-                                text-xs text-cyan-500 ring-1 ring-cyan-500">MIN</span>
+                            <span class="px-1 text-xs text-cyan-500 ring-cyan-500">MIN</span>
                         </div>
                         <div>{contractMinTotal === 0 ? '-' : `₩ ${contractMinTotal.toLocaleString()}`}</div>
                     </div>
@@ -251,8 +266,7 @@
                 <div>
                     <div class="flex justify-between font-semibold">
                         <div>Contract
-                            <span class="rounded-md px-1 ml-1
-                                text-xs text-purple-500 ring-1 ring-purple-500">MAX</span>
+                            <span class="px-1 text-xs text-purple-500 ring-purple-500">MAX</span>
                         </div>
                         <div>{contractMaxTotal === 0 ? '-' : `₩ ${contractMaxTotal.toLocaleString()}`}</div>
                     </div>
@@ -273,8 +287,7 @@
                 <div>
                     <div class="flex justify-between font-semibold">
                         <div>Risk
-                            <span class="rounded-md px-1 ml-1
-                                text-xs text-purple-500 ring-1 ring-purple-500">MAX</span>
+                            <span class="px-1 text-xs text-purple-500 ring-purple-500">MAX</span>
                         </div>
                         <div>{riskTotal === 0 ? '-' : `₩ ${riskTotal.toLocaleString()}`}</div>
                     </div>
@@ -293,7 +306,7 @@
                 </div>
 
                 <div class="flex justify-end mt-4">
-                    <button class="p-1 rounded-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 cursor-pointer"
+                    <button class="p-1 rounded-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 cursor-pointer pdf-hide"
                         class:bg-gray-200={selectedIndex == index}
                         on:click={pleaseEditCost}>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">

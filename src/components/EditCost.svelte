@@ -45,7 +45,7 @@
     }
 </script>
 
-<div class="basis-72 p-3 border-l relative overflow-y-scroll">
+<div class="shrink-0 w-72 p-3 border-l relative overflow-auto">
     <button class="cursor-pointer absolute top-2 right-2 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-full"
         on:click={pleaseCloseEditCost}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
