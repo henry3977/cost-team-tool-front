@@ -195,7 +195,7 @@
                 format: [canvas.width, canvas.height] // set needed dimensions for any element
             });
             doc.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
-            doc.save(`${projects[selProjectIdx].name}.pdf`);
+            doc.save(`${projects[selProjectIdx].name}_${new Date().toISOString().slice(0,10).replaceAll('-','')}.pdf`);
         });
     }
 
