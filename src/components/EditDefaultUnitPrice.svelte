@@ -6,8 +6,7 @@
     }
 </script>
 
-<div class="shrink-0 w-72 p-3 border-l overflow-y-scroll">
-
+<div class="shrink-0 w-72 p-3 border-l bg-gray-100 overflow-y-scroll">
     <h2 class="text-lg font-bold">단가 설정</h2>
     <div class="divide-y-[0.5px] divide-gray-400">
         <div class="py-4">
@@ -196,7 +195,7 @@
     </div>
     <div class="py-4">
         <button class="px-4 py-1 rounded-lg
-            text-gray-700 bg-gray-200 hover:bg-gray-100 active:bg-gray-50"
+            text-white bg-gray-500 hover:bg-gray-600 active:bg-gray-700"
             on:click={saveDefaultUnitPrice}>
             저장
         </button>

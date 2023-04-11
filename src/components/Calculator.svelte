@@ -103,17 +103,12 @@
             $costs[index].minTotal = $costs[index].minTotal + $costs[index].construction.building + $costs[index].construction.site;
             $costs[index].maxTotal = $costs[index].maxTotal + $costs[index].construction.building + $costs[index].construction.site;
         }
-        pleaseSetProjectCosts();
+        pleaseSetProjects();
     }
 
     function getRiskTotal(risk) {
         return risk.customs.reduce((a, b) => a + b.riskAllowance, 0) + risk.contract.riskAllowance ? risk.contract.riskAllowance : 0;
     }
-
-    // function selectdType() {
-    //     console.log('selectdType')
-    //     $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
-    // }
 
     function pleaseDeleteMe() {
         dispatch('pleaseDeleteMe', {
@@ -127,8 +122,8 @@
 		});
     }
 
-    function pleaseSetProjectCosts() {
-        dispatch('pleaseSetProjectCosts');
+    function pleaseSetProjects() {
+        dispatch('pleaseSetProjects');
     }
 
 </script>
@@ -226,7 +221,6 @@
                         
                     </div>
                 </div>
-                
                 <div>
                     <div class="flex justify-between font-semibold">
                         <div>Construction</div>
@@ -241,7 +235,6 @@
                         <div>{$costs[index].construction.site === 0 ? '-' : `₩ ${$costs[index].construction.site.toLocaleString()}`}</div>
                     </div>
                 </div>
-
                 <div>
                     <div class="flex justify-between font-semibold">
                         <div>Contract
@@ -283,7 +276,6 @@
                         </div>
                     {/each}
                 </div>
-
                 <div>
                     <div class="flex justify-between font-semibold">
                         <div>Risk
@@ -304,7 +296,6 @@
                         </div>
                     {/each}
                 </div>
-
                 <div class="flex justify-end mt-4">
                     <button class="p-1 rounded-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 cursor-pointer pdf-hide"
                         class:bg-gray-200={selectedIndex == index}
@@ -314,7 +305,6 @@
                         </svg>          
                     </button>
                 </div>
-
             </div>
         </div>
     {/if}

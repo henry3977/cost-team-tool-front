@@ -3,12 +3,7 @@
     import { createEventDispatcher } from 'svelte';
 
 	const dispatch = createEventDispatcher();
-
     export let index;
-
-    function pleaseCloseEditCost() {
-        dispatch('pleaseCloseEditCost');
-    }
 
     function addRisk() {
         $costs[index].risk.customs = [...$costs[index].risk.customs, {
@@ -42,6 +37,10 @@
             $costs[index].contract.customs.splice(i, 1);
             $costs[index].contract.customs = $costs[index].contract.customs;
         }
+    }
+
+    function pleaseCloseEditCost() {
+        dispatch('pleaseCloseEditCost');
     }
 </script>
 
@@ -105,7 +104,6 @@
                         </svg>
                     </button>
                 </div>
-        
                 <div class="mb-2">
                     <input type="text" 
                         class="px-1 h-5 w-[249px] text-xs ring-[0.5px] ring-gray-400 rounded-sm read-only:bg-gray-200"
@@ -164,7 +162,6 @@
 
                 {#each $costs[index].contract.customs as contract, i}
                     <div class="mb-2">
-
                         <div class="flex items-center">
                             <button class="px-2 rounded-lg
                                 text-gray-700 hover:bg-gray-100 active:bg-gray-200"
@@ -219,16 +216,14 @@
             
             {#if Object.keys($costs[index].risk.contract).length !== 0}
                 <div class="mb-2">
-
                     <div class="mt-2 flex justify-between item-center">
                         <input type="text"
                             class="px-1 h-5 w-[249px] text-xs ring-[0.5px] ring-gray-400 rounded-sm read-only:bg-gray-200"
                             bind:value={$costs[index].risk.contract.desc}
                             placeholder="Description of Risk">
                     </div>
-                
                     <div class="mt-2 mr-[15px] flex justify-between items-center">
-                        <span class="ml-1  text-xs">Probability</span>
+                        <span class="ml-1 text-xs">Probability</span>
                         <div class="flex">
                             <input type="radio"
                                 name="probability-{$costs[index].risk.contract.id}"
@@ -304,7 +299,8 @@
                             <input type="number"
                                 id="risk-min-{$costs[index].risk.contract.id}"
                                 bind:value={$costs[index].risk.contract.min}
-                                class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm read-only:bg-gray-200">
+                                class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm read-only:bg-gray-200"
+                                readonly>
                             <span class="text-xs">₩</span>
                         </div>
                     </div>
@@ -315,7 +311,8 @@
                             <input type="number" 
                                 id="risk-max-{$costs[index].risk.contract.id}"
                                 bind:value={$costs[index].risk.contract.max}
-                                class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm read-only:bg-gray-200">
+                                class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm read-only:bg-gray-200"
+                                readonly>
                             <span class="text-xs">₩</span>
                         </div>
                     </div>
@@ -329,10 +326,8 @@
                 </div>
             {/if}
            
-            
             {#each $costs[index].risk.customs as risk, i (risk.id)}
                 <div class="mb-2">
-    
                     <div class="flex items-center">
                         <button class="px-2 rounded-lg
                             text-gray-700 hover:bg-gray-100 active:bg-gray-200"
@@ -342,17 +337,14 @@
                             </svg>
                         </button>
                     </div>
-             
-                    
                     <div class="mt-2 flex justify-between item-center">
                         <input type="text"
                             class="px-1 h-5 w-[249px] text-xs ring-[0.5px] ring-gray-400 rounded-sm read-only:bg-gray-200"
                             bind:value={risk.desc}
                             placeholder="Description of Risk">
                     </div>
-                  
                     <div class="mt-2 mr-[15px] flex justify-between items-center">
-                        <span class="ml-1  text-xs">Probability</span>
+                        <span class="ml-1 text-xs">Probability</span>
                         <div class="flex">
                             <input type="radio" name="probability-{risk.id}" id="probability-low-{risk.id}"
                                 value={1}
@@ -381,7 +373,7 @@
                         </div>
                     </div>
                     <div class="mt-2 mr-[15px] flex justify-between items-center">
-                        <span class="ml-1  text-xs">Impact</span>
+                        <span class="ml-1 text-xs">Impact</span>
                         <div class="flex">
                             <input type="radio" name="impact-{risk.id}" id="impact-low-{risk.id}"
                                 value={1}
@@ -410,7 +402,7 @@
                         </div>
                     </div>
                     <div class="mt-1 flex justify-between items-center">
-                        <label class="ml-1  text-xs" for="risk-min-{risk.id}">Min</label>
+                        <label class="ml-1 text-xs" for="risk-min-{risk.id}">Min</label>
                         <div>
                             <input type="number" id="risk-min-{risk.id}"
                                 bind:value={risk.min}
@@ -419,7 +411,7 @@
                         </div>
                     </div>
                     <div class="mt-1 flex justify-between items-center">
-                        <label class="ml-1  text-xs" for="risk-max-{risk.id}">Max</label>
+                        <label class="ml-1 text-xs" for="risk-max-{risk.id}">Max</label>
                         <div>
                             <input type="number" id="risk-max-{risk.id}"
                                 bind:value={risk.max}
@@ -439,5 +431,4 @@
     
         </div>
     </div>
-
 </div>
