@@ -55,7 +55,6 @@
         {#if $costs[index].plan.type !== 'lease'}
             <div class="py-4">
                 <h3 class="font-semibold">Support</h3>
-                
                 {#if $costs[index].plan.allContract}
                     <div class="mt-2 flex justify-between items-end">
                         <label class="ml-1 text-xs" for="support-amount">전체도급</label>
@@ -79,7 +78,6 @@
                         </div>
                     </div>
                 {/if}
-
                 <div class="mt-1 flex justify-between items-end">
                     <label class="ml-1 text-xs" for="support-max-rate">최대비용 증가율</label>
                     <div>
@@ -91,7 +89,6 @@
                     </div>
                 </div>
             </div>
-        
             <div class="py-4">
                 <div class="flex items-center">
                     <h3 class="font-semibold">Contract</h3>
@@ -130,7 +127,6 @@
                         </div>
                     </div>
                 </div>
-
                 {#if $costs[index].plan.allContract}
                     <div class="mb-2">
                         <input type="text" 
@@ -159,7 +155,6 @@
                         </div>
                     </div>
                 {/if}
-
                 {#each $costs[index].contract.customs as contract, i}
                     <div class="mb-2">
                         <div class="flex items-center">
@@ -199,8 +194,6 @@
                 {/each}
             </div>
         {/if}
- 
-    
         <div class="py-4">
             <div class="flex items-center">
                 <h3 class="font-semibold">Risk</h3>
@@ -213,8 +206,7 @@
                     </svg>
                 </button>
             </div>
-            
-            {#if Object.keys($costs[index].risk.contract).length !== 0}
+            {#if $costs[index].risk.contract !== null}
                 <div class="mb-2">
                     <div class="mt-2 flex justify-between item-center">
                         <input type="text"
@@ -325,7 +317,6 @@
                     </div>
                 </div>
             {/if}
-           
             {#each $costs[index].risk.customs as risk, i (risk.id)}
                 <div class="mb-2">
                     <div class="flex items-center">
@@ -428,7 +419,6 @@
                     </div>
                 </div>
             {/each}
-    
         </div>
     </div>
 </div>

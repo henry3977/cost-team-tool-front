@@ -84,7 +84,7 @@
                 customs: []
             },
             risk: {
-                contract: {},
+                contract: null,
                 customs: []
             },
 

@@ -72,8 +72,8 @@
         let costContractMinTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.min, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.min, 0);
         let costContractMaxTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.max, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.max, 0);
 
-        if ($costs[index].plan.type === 'lease') $costs[index].risk.contract = {};
-        if ($costs[index].plan.type !== 'lease' && Object.keys($costs[index].risk.contract).length === 0) {
+        if ($costs[index].plan.type === 'lease') $costs[index].risk.contract = null;
+        if ($costs[index].plan.type !== 'lease' && $costs[index].risk.contract === null) {
             $costs[index].risk.contract = {
                 id: 'contract',
                 desc: '도급 계약 관리',
@@ -83,14 +83,12 @@
                 max: Math.round(costContractMaxTotal * 0.1),
                 riskAllowance: Math.round( ((Math.round(costContractMinTotal * 0.1) + Math.round(costContractMaxTotal * 0.1)) / 2) * ((9) / 10) )
             };
-
-        } 
-        if (Object.keys($costs[index].risk.contract).length !== 0) {
             $costs[index].risk.contract.min = Math.round(costContractMinTotal * 0.1);
             $costs[index].risk.contract.max = Math.round(costContractMaxTotal * 0.1);
             $costs[index].risk.contract.riskAllowance = Math.round(
                 (($costs[index].risk.contract.min + $costs[index].risk.contract.max) / 2) * (($costs[index].risk.contract.probability * $costs[index].risk.contract.impact) / 10) );
-        }
+        } 
+
         $costs[index].risk.customs.forEach(risk => {
             risk.riskAllowance = Math.round( ((risk.min + risk.max) / 2) * ((risk.probability * risk.impact) / 10) );
         });
@@ -107,7 +105,10 @@
     }
 
     function getRiskTotal(risk) {
-        return risk.customs.reduce((a, b) => a + b.riskAllowance, 0) + risk.contract.riskAllowance ? risk.contract.riskAllowance : 0;
+        let riskTotal = 0;
+        if (risk.contract !== null) iskTotal = riskTotal + risk.contract.riskAllowance;
+        riskTotal = riskTotal + risk.customs.reduce((a, b) => a + b.riskAllowance, 0);
+        return riskTotal;
     }
 
     function pleaseDeleteMe() {
@@ -204,7 +205,6 @@
                         <div>{$costs[index].maxTotal === 0 ? '-' : `₩ ${$costs[index].maxTotal.toLocaleString()}`}</div>
                     </div>
                 </div>
-
                 <div>
                     <div class="flex justify-between font-semibold">
                         <div>Support
@@ -255,7 +255,6 @@
                         </div>
                     {/each}
                 </div>
-
                 <div>
                     <div class="flex justify-between font-semibold">
                         <div>Contract
@@ -283,7 +282,7 @@
                         </div>
                         <div>{riskTotal === 0 ? '-' : `₩ ${riskTotal.toLocaleString()}`}</div>
                     </div>
-                    {#if Object.keys($costs[index].risk.contract).length !== 0}
+                    {#if $costs[index].risk.contract !== null}
                         <div class="flex justify-between text-gray-500">
                             <div>{$costs[index].risk.contract.desc}</div>
                             <div>{$costs[index].risk.contract.riskAllowance === 0 ? '-' : `₩ ${$costs[index].risk.contract.riskAllowance.toLocaleString()}`}</div>
