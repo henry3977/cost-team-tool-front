@@ -106,7 +106,7 @@
 
     function getRiskTotal(risk) {
         let riskTotal = 0;
-        if (risk.contract !== null) iskTotal = riskTotal + risk.contract.riskAllowance;
+        if (risk.contract !== null) riskTotal = riskTotal + risk.contract.riskAllowance;
         riskTotal = riskTotal + risk.customs.reduce((a, b) => a + b.riskAllowance, 0);
         return riskTotal;
     }
