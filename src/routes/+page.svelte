@@ -14,37 +14,78 @@
     let defaultUnitPrice = {
         support: {
             ldc: 8000000,
-            contract: 3540000,
-            maxRate:104.3
-        },
-        contract: {
-            minRate: 150,
-            maxRate: 165,
-            electMaxRate: 120
+            contract: 3600000
         },
         new: {
-            building: 991968,
-            site: 178787,
-            elect: 580000
+            ldc: {
+                building: 991968,
+                piloti: 534995,
+                site: 137976,
+                demolition: 40811
+            },
+            contract: {
+                building: 1636747,
+                piloti: 882641.75,
+                site: 190000,
+                demolition: 39000
+            },
+            requiredContract: 600000
         },
         major: {
-            building: 732758.87,
-            site: 227171.45,
-            elect: 300000
+            ldc: {
+                building: 732758.87,
+                site: 227171.45,
+            },
+            contract: {
+                building: 1209052.1355,
+                site: 250000,
+            },
+            requiredContract: 330000
         },
         store: {
-            building: 830734,
-            site: 0,
-            elect: 300000
-        },
-        lease: {
-            building: 0,
-            site: 0,
-            elect: 0,
-            min: 936944,
-            max: 1516164
+            ldc: {
+                building: 830734
+            },
+            contract: {
+                building: 1370711.1
+            },
+            requiredContract: 330000
         }
     }
+    // let defaultUnitPrice = {
+    //     support: {
+    //         ldc: 8000000,
+    //         contract: 3540000,
+    //         maxRate:104.3
+    //     },
+    //     contract: {
+    //         minRate: 150,
+    //         maxRate: 165,
+    //         electMaxRate: 120
+    //     },
+    //     new: {
+    //         building: 991968,
+    //         site: 178787,
+    //         elect: 580000
+    //     },
+    //     major: {
+    //         building: 732758.87,
+    //         site: 227171.45,
+    //         elect: 300000
+    //     },
+    //     store: {
+    //         building: 830734,
+    //         site: 0,
+    //         elect: 300000
+    //     },
+    //     lease: {
+    //         building: 0,
+    //         site: 0,
+    //         elect: 0,
+    //         min: 936944,
+    //         max: 1516164
+    //     }
+    // }
 
     onMount(() => {
         if (localStorage.getItem('defaultUnitPrice') === null) localStorage.setItem('defaultUnitPrice', JSON.stringify(defaultUnitPrice));
@@ -69,7 +110,9 @@
                 buildingArea: null,
                 siteArea: null,
                 weeks: null,
-                allContract: false
+                allContract: false,
+                demolition: false,
+                piloti: false
             },
             support: {
                 min: 0,
