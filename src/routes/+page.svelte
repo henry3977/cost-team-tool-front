@@ -103,7 +103,7 @@
 
     function getDefaultCost() {
         return {
-            unitPrice: {},
+            unitPrice: null,
             plan: {
                 type:'new',
                 comment: null,
@@ -114,14 +114,6 @@
                 demolition: false,
                 piloti: false
             },
-            support: {
-                min: 0,
-                max: 0
-            },
-            construction: {
-                building: 0,
-                site: 0
-            },
             contract: {
                 defaults: [],
                 customs: []
@@ -129,10 +121,7 @@
             risk: {
                 contract: {},
                 customs: []
-            },
-
-            minTotal: 0,
-            maxTotal: 0
+            }
         };
     }
 

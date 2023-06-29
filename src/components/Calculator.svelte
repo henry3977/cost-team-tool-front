@@ -7,28 +7,55 @@
     export let index;
     export let selectedIndex;
     export let defaultUnitPrice;
-
-    onMount(() => {
-        defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
-        if ($costs[index].unitPrice.support === undefined) $costs[index].unitPrice.support = defaultUnitPrice.support;
-        if ($costs[index].unitPrice.contract === undefined) $costs[index].unitPrice.contract = defaultUnitPrice.contract;
-        if ($costs[index].unitPrice.construction === undefined) $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
-	});
+    let support = 0;
+    let building = 0;
+    let piloti = 0;
+    let site = 0;
+    let demolition = 0;
+    defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
+    if ($costs[index].unitPrice === null) $costs[index].unitPrice = defaultUnitPrice;
+    // onMount(() => {
+    //     console.log('onMount');
+    //     defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
+    //     if ($costs[index].unitPrice === null) $costs[index].unitPrice = defaultUnitPrice;
+    //     // if ($costs[index].unitPrice.support === undefined) $costs[index].unitPrice.support = defaultUnitPrice.support;
+    //     // if ($costs[index].unitPrice.contract === undefined) $costs[index].unitPrice.contract = defaultUnitPrice.contract;
+    //     // if ($costs[index].unitPrice.construction === undefined) $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
+	// });
 
     afterUpdate(() => {
-        // if ($costs[index].plan.buildingArea || $costs[index].plan.siteArea || $costs[index].plan.weeks) calculators();
+        if ($costs[index].plan.buildingArea || $costs[index].plan.siteArea || $costs[index].plan.weeks) calculators();
     });
 
-    $: constructionTotal = $costs[index].construction.building + $costs[index].construction.site;
-    $: contractMinTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.min, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.min, 0);
-    $: contractMaxTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.max, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.max, 0);
-    $: riskTotal = getRiskTotal($costs[index].risk);
-    
-    function calculators() {
-        defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
-        if ($costs[index].unitPrice.support === undefined) $costs[index].unitPrice.support = defaultUnitPrice.support;
-        if ($costs[index].unitPrice.construction === undefined) $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
+    // $: constructionTotal = $costs[index].construction.building + $costs[index].construction.site;
+    // $: contractMinTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.min, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.min, 0);
+    // $: contractMaxTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.max, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.max, 0);
+    // $: riskTotal = getRiskTotal($costs[index].risk);
+    // $: support = $costs[index].plan.allContract 
+    //     ? $costs[index].plan.weeks * $costs[index].unitPrice.support.contract
+    //     : $costs[index].plan.weeks * $costs[index].unitPrice.support.ldc;
+    function calSupport() {
+        $costs[index].plan.weeks
     }
+
+    function calculators() {
+        // defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
+        // if ($costs[index].unitPrice.support === undefined) $costs[index].unitPrice.support = defaultUnitPrice.support;
+        // if ($costs[index].unitPrice.construction === undefined) $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
+
+        support = $costs[index].plan.allContract 
+            ? $costs[index].plan.weeks * $costs[index].unitPrice.support.contract
+            : $costs[index].plan.weeks * $costs[index].unitPrice.support.ldc;
+        
+        building = $costs[index].plan.allContract 
+            ? $costs[index].plan.buildingArea * $costs[index].unitPrice[$costs[index].plan.type].contract.building
+            : $costs[index].plan.buildingArea * $costs[index].unitPrice[$costs[index].plan.type].ldc.building;
+            
+        site = $costs[index].plan.allContract 
+            ? $costs[index].plan.siteArea * $costs[index].unitPrice[$costs[index].plan.type].contract.site
+            : $costs[index].plan.siteArea * $costs[index].unitPrice[$costs[index].plan.type].ldc.site;
+    }
+
 
     // function calculators() {
     //     defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
@@ -175,8 +202,8 @@
             </div>
 
             <div class="flex justify-between items-end">
-                <label for="building-area-{index}">비고</label>
-                <input type="text" id="building-area-{index}"
+                <label for="comment-{index}">비고</label>
+                <input type="text" id="comment-{index}"
                     bind:value={$costs[index].plan.comment}
                     class="px-2 text-right                     
                         text-cyan-500 text-lg
@@ -214,80 +241,43 @@
     </div>
     {#if $costs[index].plan.buildingArea || $costs[index].plan.siteArea || $costs[index].plan.weeks}
         <div class="p-4">
-            <div class="flex flex-col gap-y-3.5 text-sm">
+            <div class="flex flex-col gap-y-2 text-sm">
                 <div class="font-semibold">
                     <div class="flex justify-between text-cyan-500 text-lg">
-                        <div>MIN</div>
-                        <div>{$costs[index].minTotal === 0 ? '-' : `₩ ${$costs[index].minTotal.toLocaleString()}`}</div>
-                    </div>
-                    <div class="flex justify-between text-purple-500  text-lg">
                         <div>MAX</div>
-                        <div>{$costs[index].maxTotal === 0 ? '-' : `₩ ${$costs[index].maxTotal.toLocaleString()}`}</div>
+                        <div></div>
                     </div>
                 </div>
 
                 <div>
                     <div class="flex justify-between font-semibold">
-                        <div>Support
-                            <span class="px-1 text-xs text-cyan-500 ring-cyan-500">MIN</span>
-                        </div>
-                        <div>{$costs[index].support.min === 0 ? '-' : `₩ ${$costs[index].support.min.toLocaleString()}`}</div>
-                        
-                    </div>
-                    <div class="flex justify-between font-semibold">
-                        <div>Support
-                            <span class="px-1 text-xs text-purple-500 ring-purple-500">MAX</span>
-                        </div>
-                        <div>{$costs[index].support.max === 0 ? '-' : `₩ ${$costs[index].support.max.toLocaleString()}`}</div>
-                        
+                        <div>Support</div>
+                        <div>{support.toLocaleString()}</div>
                     </div>
                 </div>
                 <div>
                     <div class="flex justify-between font-semibold">
                         <div>Construction</div>
-                        <div>{constructionTotal === 0 ? '-' : `₩ ${constructionTotal.toLocaleString()}`}</div>
+                        <div></div>
                     </div>
                     <div class="flex justify-between text-gray-500">
                         <div>건물 공사</div>
-                        <div>{$costs[index].construction.building === 0 ? '-' : `₩ ${$costs[index].construction.building.toLocaleString()}`}</div>
+                        <div>{building.toLocaleString()}</div>
                     </div>
                     <div class="flex justify-between text-gray-500">
                         <div>부지 공사</div>
-                        <div>{$costs[index].construction.site === 0 ? '-' : `₩ ${$costs[index].construction.site.toLocaleString()}`}</div>
+                        <div>{site.toLocaleString()}</div>
                     </div>
                 </div>
                 <div>
                     <div class="flex justify-between font-semibold">
-                        <div>Contract
-                            <span class="px-1 text-xs text-cyan-500 ring-cyan-500">MIN</span>
-                        </div>
-                        <div>{contractMinTotal === 0 ? '-' : `₩ ${contractMinTotal.toLocaleString()}`}</div>
+                        <div>Contract</div>
+                        <div></div>
                     </div>
                     {#each $costs[index].contract.defaults as contract}
                         <div class="flex justify-between text-gray-500">
                             <div>{contract.name}</div>
-                            <div>{contract.min === 0 ? '-' : `₩ ${contract.min.toLocaleString()}`}</div>
-                        </div>
-                    {/each}
-                    {#each $costs[index].contract.customs as contract}
-                        <div class="flex justify-between text-gray-500">
-                            <div>{contract.name}</div>
-                            <div>{contract.min === null ? '-' : `₩ ${contract.min.toLocaleString()}`}</div>
-                        </div>
-                    {/each}
-                </div>
-
-                <div>
-                    <div class="flex justify-between font-semibold">
-                        <div>Contract
-                            <span class="px-1 text-xs text-purple-500 ring-purple-500">MAX</span>
-                        </div>
-                        <div>{contractMaxTotal === 0 ? '-' : `₩ ${contractMaxTotal.toLocaleString()}`}</div>
-                    </div>
-                    {#each $costs[index].contract.defaults as contract}
-                        <div class="flex justify-between text-gray-500">
-                            <div>{contract.name}</div>
-                            <div>{contract.max === 0 ? '-' : `₩ ${contract.max.toLocaleString()}`}</div>
+                            <div></div>
                         </div>
                     {/each}
                     {#each $costs[index].contract.customs as contract}
@@ -298,18 +288,10 @@
                     {/each}
                 </div>
                 <div>
-                    <div class="flex justify-between font-semibold">
-                        <div>Risk
-                            <span class="px-1 text-xs text-purple-500 ring-purple-500">MAX</span>
-                        </div>
-                        <div>{riskTotal === 0 ? '-' : `₩ ${riskTotal.toLocaleString()}`}</div>
+                    <div class="flex justify-between font-semibold text-red-500">
+                        <div>Risk</div>
+                        <div></div>
                     </div>
-                    {#if Object.keys($costs[index].risk.contract).length !== 0}
-                        <div class="flex justify-between text-gray-500">
-                            <div>{$costs[index].risk.contract.desc}</div>
-                            <div>{$costs[index].risk.contract.riskAllowance === 0 ? '-' : `₩ ${$costs[index].risk.contract.riskAllowance.toLocaleString()}`}</div>
-                        </div>
-                    {/if}
                     {#each $costs[index].risk.customs as risk}
                         <div class="flex justify-between text-gray-500">
                             <div>{risk.desc}</div>
