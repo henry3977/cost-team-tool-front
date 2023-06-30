@@ -1,59 +1,58 @@
 <script>
-    import { onMount, afterUpdate } from 'svelte';
+    import { afterUpdate } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
     import { costs } from '../stores.js';
 
 	const dispatch = createEventDispatcher();
     export let index;
     export let selectedIndex;
-    export let defaultUnitPrice;
+    let unitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
+
+    let type = '';
+    let cnstrOption = '';
     let support = 0;
     let building = 0;
     let piloti = 0;
     let site = 0;
-    let demolition = 0;
-    defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
-    if ($costs[index].unitPrice === null) $costs[index].unitPrice = defaultUnitPrice;
-    // onMount(() => {
-    //     console.log('onMount');
-    //     defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
-    //     if ($costs[index].unitPrice === null) $costs[index].unitPrice = defaultUnitPrice;
-    //     // if ($costs[index].unitPrice.support === undefined) $costs[index].unitPrice.support = defaultUnitPrice.support;
-    //     // if ($costs[index].unitPrice.contract === undefined) $costs[index].unitPrice.contract = defaultUnitPrice.contract;
-    //     // if ($costs[index].unitPrice.construction === undefined) $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
-	// });
+    let siteDemolition = 0;
+    let requiredContract = 0;
+    let risk = 0;
+
+    let contractTotal = 0;
+    let constructionTotal = 0;
+    let riskTotal = 0;
+    let max = 0;
 
     afterUpdate(() => {
         if ($costs[index].plan.buildingArea || $costs[index].plan.siteArea || $costs[index].plan.weeks) calculators();
     });
 
-    // $: constructionTotal = $costs[index].construction.building + $costs[index].construction.site;
-    // $: contractMinTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.min, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.min, 0);
-    // $: contractMaxTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.max, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.max, 0);
-    // $: riskTotal = getRiskTotal($costs[index].risk);
-    // $: support = $costs[index].plan.allContract 
-    //     ? $costs[index].plan.weeks * $costs[index].unitPrice.support.contract
-    //     : $costs[index].plan.weeks * $costs[index].unitPrice.support.ldc;
-    function calSupport() {
-        $costs[index].plan.weeks
-    }
-
     function calculators() {
-        // defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
-        // if ($costs[index].unitPrice.support === undefined) $costs[index].unitPrice.support = defaultUnitPrice.support;
-        // if ($costs[index].unitPrice.construction === undefined) $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
+        type = $costs[index].plan.type;
+        cnstrOption = $costs[index].plan.allContract ? 'contract' : 'ldc';
+        if (type !== 'new') {
+            $costs[index].plan.piloti = false;
+            $costs[index].plan.rebuild = false;
+        }
+        support = Math.floor($costs[index].plan.weeks * unitPrice.support[cnstrOption]);
+        building = Math.floor($costs[index].plan.buildingArea * unitPrice[type][cnstrOption].building);
+        site = type !== 'store'
+            ? Math.floor($costs[index].plan.siteArea * unitPrice[type][cnstrOption].site)
+            : 0;
+        piloti = $costs[index].plan.piloti
+            ? Math.floor($costs[index].plan.floorArea * unitPrice[type][cnstrOption].piloti)
+            : 0;
+        siteDemolition = $costs[index].plan.rebuild
+            ? Math.floor($costs[index].plan.siteArea * unitPrice[type][cnstrOption].siteDemolition)
+            : 0;
+        requiredContract = Math.floor($costs[index].plan.buildingArea * unitPrice[type].requiredContract);
 
-        support = $costs[index].plan.allContract 
-            ? $costs[index].plan.weeks * $costs[index].unitPrice.support.contract
-            : $costs[index].plan.weeks * $costs[index].unitPrice.support.ldc;
-        
-        building = $costs[index].plan.allContract 
-            ? $costs[index].plan.buildingArea * $costs[index].unitPrice[$costs[index].plan.type].contract.building
-            : $costs[index].plan.buildingArea * $costs[index].unitPrice[$costs[index].plan.type].ldc.building;
-            
-        site = $costs[index].plan.allContract 
-            ? $costs[index].plan.siteArea * $costs[index].unitPrice[$costs[index].plan.type].contract.site
-            : $costs[index].plan.siteArea * $costs[index].unitPrice[$costs[index].plan.type].ldc.site;
+        constructionTotal = building + site + piloti + siteDemolition;
+        contractTotal = requiredContract;
+        risk = Math.floor( ($costs[index].plan.risk / 100) * (constructionTotal + contractTotal) );
+        riskTotal = risk;
+
+        max = support + constructionTotal + contractTotal + riskTotal;
     }
 
 
@@ -175,23 +174,24 @@
                 <option value="new">신축</option>
                 <option value="major">개축</option>
                 <option value="store">상가</option>
-                <option value="lease">임대</option>
+                <!-- <option value="lease">임대</option> -->
             </select>
         </div>
 
         <div class="pt-6 flex flex-col gap-y-1 text-sm font-semibold">
             <div class="flex items-center justify-end h-[20px] gap-x-6">
+                {#if type === 'new'}
                 <div class="flex items-center">
-                    <input type="checkbox" id="all-demolition-{index}" class="w-4 h-4"
-                        bind:checked={$costs[index].plan.demolition}> 
-                    <label for="all-demolition-{index}" class="ml-1">부지철거</label>
+                    <input type="checkbox" id="all-rebuild-{index}" class="w-4 h-4"
+                        bind:checked={$costs[index].plan.rebuild}> 
+                    <label for="all-rebuild-{index}" class="ml-1">재건축</label>
                 </div>
-                
                 <div class="flex items-center">
                     <input type="checkbox" id="all-piloti-{index}" class="w-4 h-4"
                         bind:checked={$costs[index].plan.piloti}> 
                     <label for="all-piloti-{index}" class="ml-1">필로티</label>
                 </div>
+                {/if}
                 {#if $costs[index].plan.type !== 'lease'}
                 <div class="flex items-center">
                     <input type="checkbox" id="all-contract-{index}" class="w-4 h-4"
@@ -213,15 +213,28 @@
                 <label for="building-area-{index}">건축 면적</label>
                 <input type="number" id="building-area-{index}"
                     bind:value={$costs[index].plan.buildingArea}
+                    placeholder="제곱미터"
                     class="w-28 px-2 text-right                     
                         text-cyan-500 text-lg
                         border-b focus:outline-none focus:border-b focus:border-gray-400">
             </div>
+            {#if $costs[index].plan.piloti}
+            <div class="flex justify-between items-end">
+                <label for="floor-area-{index}">단층 면적</label>
+                <input type="number" id="floor-area-{index}"
+                    bind:value={$costs[index].plan.floorArea}
+                    placeholder="제곱미터"
+                    class="w-28 px-2 text-right                     
+                        text-cyan-500 text-lg
+                        border-b focus:outline-none focus:border-b focus:border-gray-400">
+            </div>
+            {/if}
             <div class="flex justify-between items-end h-[32px]">
                 <label for="site-area-{index}">부지 면적</label>
                 {#if $costs[index].plan.type === 'new' || $costs[index].plan.type === 'major'}
                     <input type="number" id="site-area-{index}"
                         bind:value={$costs[index].plan.siteArea}
+                        placeholder="제곱미터"
                         class="w-28 px-2 text-right                     
                             text-cyan-500 text-lg
                             border-b focus:outline-none focus:border-b focus:border-gray-400">
@@ -232,10 +245,20 @@
                 {#if $costs[index].plan.type !== 'lease'}
                     <input type="number" id="weeks-{index}"
                         bind:value={$costs[index].plan.weeks}
+                        placeholder="주"
                         class="w-28 px-2 text-right                     
                             text-cyan-500 text-lg
                             border-b focus:outline-none focus:border-b focus:border-gray-400">
                 {/if}
+            </div>
+            <div class="flex justify-between items-end h-[32px]">
+                <label for="weeks-{index}">리스크(%)</label>
+                <input type="number" id="weeks-{index}"
+                    bind:value={$costs[index].plan.risk}
+                    placeholder="%"
+                    class="w-28 px-2 text-right                     
+                        text-cyan-500 text-lg
+                        border-b focus:outline-none focus:border-b focus:border-gray-400">
             </div>
         </div>
     </div>
@@ -245,7 +268,7 @@
                 <div class="font-semibold">
                     <div class="flex justify-between text-cyan-500 text-lg">
                         <div>MAX</div>
-                        <div></div>
+                        <div>{max.toLocaleString()}</div>
                     </div>
                 </div>
 
@@ -258,21 +281,37 @@
                 <div>
                     <div class="flex justify-between font-semibold">
                         <div>Construction</div>
-                        <div></div>
+                        <div>{constructionTotal.toLocaleString()}</div>
                     </div>
                     <div class="flex justify-between text-gray-500">
                         <div>건물 공사</div>
                         <div>{building.toLocaleString()}</div>
                     </div>
+                    {#if piloti}
+                    <div class="flex justify-between text-gray-500">
+                        <div>필로티</div>
+                        <div>{piloti.toLocaleString()}</div>
+                    </div>
+                    {/if}
                     <div class="flex justify-between text-gray-500">
                         <div>부지 공사</div>
                         <div>{site.toLocaleString()}</div>
                     </div>
+                    {#if siteDemolition}
+                    <div class="flex justify-between text-gray-500">
+                        <div>부지 철거</div>
+                        <div>{siteDemolition.toLocaleString()}</div>
+                    </div>
+                    {/if}
                 </div>
                 <div>
                     <div class="flex justify-between font-semibold">
                         <div>Contract</div>
-                        <div></div>
+                        <div>{contractTotal.toLocaleString()}</div>
+                    </div>
+                    <div class="flex justify-between text-gray-500">
+                        <div>필수 도급</div>
+                        <div>{requiredContract.toLocaleString()}</div>
                     </div>
                     {#each $costs[index].contract.defaults as contract}
                         <div class="flex justify-between text-gray-500">
@@ -290,8 +329,14 @@
                 <div>
                     <div class="flex justify-between font-semibold text-red-500">
                         <div>Risk</div>
-                        <div></div>
+                        <div>{riskTotal.toLocaleString()}</div>
                     </div>
+                    {#if $costs[index].plan.risk}
+                    <div class="flex justify-between text-gray-500">
+                        <div>리스크</div>
+                        <div>{risk.toLocaleString()}</div>
+                    </div>
+                    {/if}
                     {#each $costs[index].risk.customs as risk}
                         <div class="flex justify-between text-gray-500">
                             <div>{risk.desc}</div>

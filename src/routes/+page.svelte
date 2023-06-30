@@ -21,13 +21,13 @@
                 building: 991968,
                 piloti: 534995,
                 site: 137976,
-                demolition: 40811
+                siteDemolition: 40811
             },
             contract: {
                 building: 1636747,
                 piloti: 882641.75,
                 site: 190000,
-                demolition: 39000
+                siteDemolition: 39000
             },
             requiredContract: 600000
         },
@@ -39,15 +39,18 @@
             contract: {
                 building: 1209052.1355,
                 site: 250000,
+
             },
             requiredContract: 330000
         },
         store: {
             ldc: {
-                building: 830734
+                building: 830734,
+                site: 0,
             },
             contract: {
-                building: 1370711.1
+                building: 1370711.1,
+                site: 0,
             },
             requiredContract: 330000
         }
@@ -103,7 +106,6 @@
 
     function getDefaultCost() {
         return {
-            unitPrice: null,
             plan: {
                 type:'new',
                 comment: null,
@@ -111,8 +113,11 @@
                 siteArea: null,
                 weeks: null,
                 allContract: false,
-                demolition: false,
-                piloti: false
+                rebuild: false,
+                piloti: false,
+                floorArea: null,
+                risk: null
+
             },
             contract: {
                 defaults: [],
