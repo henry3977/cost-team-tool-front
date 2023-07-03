@@ -45,12 +45,10 @@
         },
         store: {
             ldc: {
-                building: 830734,
-                site: 0,
+                building: 830734
             },
             contract: {
-                building: 1370711.1,
-                site: 0,
+                building: 1370711.1
             },
             requiredContract: 330000
         }
@@ -108,7 +106,7 @@
         return {
             plan: {
                 type:'new',
-                comment: null,
+                // comment: null,
                 buildingArea: null,
                 siteArea: null,
                 weeks: null,
