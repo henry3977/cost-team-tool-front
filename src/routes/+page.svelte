@@ -224,16 +224,17 @@
                 element.classList.toggle('hidden');
             });
             const imgData = canvas.toDataURL('image/png');
+            let orientation = 'l';
+            if (canvas.height > canvas.width) orientation = 'p';
             const doc = new jsPDF({
-                orientation: 'l', // landscape
-                unit: 'pt', // points, pixels won't work properly
+                orientation, // PDF 용지 방향
+                unit: 'px', // points, pixels won't work properly
                 format: [canvas.width, canvas.height] // set needed dimensions for any element
             });
             doc.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
             doc.save(`${projects[selProjectIdx].name}_${new Date().toISOString().slice(0,10).replaceAll('-','')}.pdf`);
         });
     }
-
 </script>
 
 <div class="h-screen">
