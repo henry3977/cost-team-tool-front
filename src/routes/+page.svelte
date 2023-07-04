@@ -122,7 +122,6 @@
                 customs: []
             },
             risk: {
-                contract: {},
                 customs: []
             }
         };

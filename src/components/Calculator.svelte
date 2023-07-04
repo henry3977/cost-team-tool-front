@@ -6,8 +6,6 @@
 	const dispatch = createEventDispatcher();
     export let index;
     export let selectedIndex;
-    let unitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
-
     let type = '';
     let cnstrOption = '';
     let support = 0;
@@ -17,11 +15,12 @@
     let siteDemolition = 0;
     let requiredContract = 0;
     let risk = 0;
-
     let contractTotal = 0;
     let constructionTotal = 0;
     let riskTotal = 0;
     let max = 0;
+
+    if ($costs[index].unitPrice === undefined) $costs[index].unitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
     setOption();
 
     afterUpdate(() => {
@@ -32,29 +31,32 @@
     function setOption() {
         type = $costs[index].plan.type;
         cnstrOption = $costs[index].plan.allContract ? 'contract' : 'ldc';
-        if (unitPrice[type][cnstrOption].piloti === undefined) $costs[index].plan.piloti = false;
-        if (unitPrice[type][cnstrOption].siteDemolition === undefined) $costs[index].plan.rebuild = false;
+        if ($costs[index].unitPrice[type][cnstrOption].piloti === undefined) $costs[index].plan.piloti = false;
+        if ($costs[index].unitPrice[type][cnstrOption].siteDemolition === undefined) $costs[index].plan.rebuild = false;
     }
 
     function calculators() {
-        console.log('calculators')
-        support = Math.floor($costs[index].plan.weeks * unitPrice.support[cnstrOption]);
-        building = Math.floor($costs[index].plan.buildingArea * unitPrice[type][cnstrOption].building);
-        site = unitPrice[type][cnstrOption].site !== undefined
-            ? Math.floor($costs[index].plan.siteArea * unitPrice[type][cnstrOption].site)
+        support = Math.floor($costs[index].plan.weeks * $costs[index].unitPrice.support[cnstrOption]);
+        building = Math.floor($costs[index].plan.buildingArea * $costs[index].unitPrice[type][cnstrOption].building);
+        site = $costs[index].unitPrice[type][cnstrOption].site !== undefined
+            ? Math.floor($costs[index].plan.siteArea * $costs[index].unitPrice[type][cnstrOption].site)
             : 0;
         piloti = $costs[index].plan.piloti
-            ? Math.floor($costs[index].plan.floorArea * unitPrice[type][cnstrOption].piloti)
+            ? Math.floor($costs[index].plan.floorArea * $costs[index].unitPrice[type][cnstrOption].piloti)
             : 0;
         siteDemolition = $costs[index].plan.rebuild
-            ? Math.floor($costs[index].plan.siteArea * unitPrice[type][cnstrOption].siteDemolition)
+            ? Math.floor($costs[index].plan.siteArea * $costs[index].unitPrice[type][cnstrOption].siteDemolition)
             : 0;
-        requiredContract = Math.floor($costs[index].plan.buildingArea * unitPrice[type].requiredContract);
+        requiredContract = Math.floor($costs[index].plan.buildingArea * $costs[index].unitPrice[type].requiredContract);
+
+        $costs[index].risk.customs.forEach(risk => {
+            risk.riskAllowance = Math.round( ((risk.min + risk.max) / 2) * ((risk.probability * risk.impact) / 10) );
+        });
 
         constructionTotal = building + site + piloti + siteDemolition;
         contractTotal = requiredContract;
         risk = Math.floor( ($costs[index].plan.risk / 100) * (constructionTotal + contractTotal) );
-        riskTotal = risk;
+        riskTotal = risk + $costs[index].risk.customs.reduce((a, b) => a + b.riskAllowance, 0);
 
         max = support + constructionTotal + contractTotal + riskTotal;
     }
@@ -62,46 +64,46 @@
 
     // function calculators() {
     //     defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
-    //     if ($costs[index].unitPrice.support === undefined) $costs[index].unitPrice.support = defaultUnitPrice.support;
-    //     if ($costs[index].unitPrice.contract === undefined) $costs[index].unitPrice.contract = defaultUnitPrice.contract;
-    //     if ($costs[index].unitPrice.construction === undefined) $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
+    //     if ($costs[index].$costs[index].unitPrice.support === undefined) $costs[index].$costs[index].unitPrice.support = default$costs[index].unitPrice.support;
+    //     if ($costs[index].$costs[index].unitPrice.contract === undefined) $costs[index].$costs[index].unitPrice.contract = default$costs[index].unitPrice.contract;
+    //     if ($costs[index].$costs[index].unitPrice.construction === undefined) $costs[index].$costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
 
-    //     $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
+    //     $costs[index].$costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
     //     $costs[index].support.min = 0;
     //     $costs[index].support.max = 0;
     //     if ($costs[index].plan.type !== 'lease') {
     //         $costs[index].support.min = $costs[index].plan.allContract 
-    //             ? Math.round($costs[index].plan.weeks * $costs[index].unitPrice.support.contract)
-    //             : Math.round($costs[index].plan.weeks * $costs[index].unitPrice.support.ldc);
-    //         $costs[index].support.max = Math.round($costs[index].support.min * ($costs[index].unitPrice.support.maxRate / 100));
+    //             ? Math.round($costs[index].plan.weeks * $costs[index].$costs[index].unitPrice.support.contract)
+    //             : Math.round($costs[index].plan.weeks * $costs[index].$costs[index].unitPrice.support.ldc);
+    //         $costs[index].support.max = Math.round($costs[index].support.min * ($costs[index].$costs[index].unitPrice.support.maxRate / 100));
     //     }
 
     //     $costs[index].construction.building = 0;
     //     $costs[index].construction.site = 0;
     //     if (!$costs[index].plan.allContract) {
-    //         $costs[index].construction.building = Math.round($costs[index].plan.buildingArea * $costs[index].unitPrice.construction.building);
-    //         $costs[index].construction.site = Math.round($costs[index].plan.siteArea * $costs[index].unitPrice.construction.site);
+    //         $costs[index].construction.building = Math.round($costs[index].plan.buildingArea * $costs[index].$costs[index].unitPrice.construction.building);
+    //         $costs[index].construction.site = Math.round($costs[index].plan.siteArea * $costs[index].$costs[index].unitPrice.construction.site);
     //     }
 
     //     $costs[index].contract.defaults = [];
     //     if ($costs[index].plan.type === 'lease') {
     //         $costs[index].contract.defaults.push({
     //             name: '상가 내부 인테리어',
-    //             min: Math.round($costs[index].unitPrice.construction.min * $costs[index].plan.buildingArea),
-    //             max: Math.round($costs[index].unitPrice.construction.max * $costs[index].plan.buildingArea)
+    //             min: Math.round($costs[index].$costs[index].unitPrice.construction.min * $costs[index].plan.buildingArea),
+    //             max: Math.round($costs[index].$costs[index].unitPrice.construction.max * $costs[index].plan.buildingArea)
     //         });
     //     } else {
     //         $costs[index].contract.defaults.push({
     //             name: '전기 통신 소방',
-    //             min: Math.round($costs[index].plan.buildingArea * $costs[index].unitPrice.construction.elect),
-    //             max: Math.round($costs[index].plan.buildingArea * $costs[index].unitPrice.construction.elect * ($costs[index].unitPrice.contract.electMaxRate / 100))
+    //             min: Math.round($costs[index].plan.buildingArea * $costs[index].$costs[index].unitPrice.construction.elect),
+    //             max: Math.round($costs[index].plan.buildingArea * $costs[index].$costs[index].unitPrice.construction.elect * ($costs[index].$costs[index].unitPrice.contract.electMaxRate / 100))
     //         });
     //         if ($costs[index].plan.allContract) {
-    //             let constructionTotal = Math.round($costs[index].plan.buildingArea * $costs[index].unitPrice.construction.building) + Math.round($costs[index].plan.siteArea * $costs[index].unitPrice.construction.site);
+    //             let constructionTotal = Math.round($costs[index].plan.buildingArea * $costs[index].$costs[index].unitPrice.construction.building) + Math.round($costs[index].plan.siteArea * $costs[index].$costs[index].unitPrice.construction.site);
     //             $costs[index].contract.defaults.push({
     //                 name: '건축',
-    //                 min: Math.round(constructionTotal * ($costs[index].unitPrice.contract.minRate / 100)),
-    //                 max: Math.round(constructionTotal * ($costs[index].unitPrice.contract.maxRate / 100))
+    //                 min: Math.round(constructionTotal * ($costs[index].$costs[index].unitPrice.contract.minRate / 100)),
+    //                 max: Math.round(constructionTotal * ($costs[index].$costs[index].unitPrice.contract.maxRate / 100))
     //             });
     //         }
     //     }
@@ -190,14 +192,14 @@
                         bind:checked={$costs[index].plan.allContract}> 
                     <label for="all-contract-{index}" class="ml-1">전체도급</label>
                 </div>
-                {#if unitPrice[type][cnstrOption].piloti !== undefined}
+                {#if $costs[index].unitPrice[type][cnstrOption].piloti !== undefined}
                 <div class="flex items-center">
                     <input type="checkbox" id="piloti-{index}" class="w-4 h-4"
                         bind:checked={$costs[index].plan.piloti}> 
                     <label for="piloti-{index}" class="ml-1">필로티</label>
                 </div>
                 {/if}
-                {#if unitPrice[type][cnstrOption].siteDemolition !== undefined}
+                {#if $costs[index].unitPrice[type][cnstrOption].siteDemolition !== undefined}
                 <div class="flex items-center">
                     <input type="checkbox" id="rebuild-{index}" class="w-4 h-4"
                         bind:checked={$costs[index].plan.rebuild}> 
@@ -221,7 +223,7 @@
                     class="w-28 px-2 text-right text-base
                         border-b focus:outline-none focus:border-b focus:border-gray-400">
             </div>
-            {#if unitPrice[type][cnstrOption].site !== undefined}
+            {#if $costs[index].unitPrice[type][cnstrOption].site !== undefined}
             <div class="flex justify-between items-end">
                 <label for="site-area-{index}">부지 면적</label>
                 <input type="number" id="site-area-{index}"
@@ -267,24 +269,6 @@
                         <div>MAX</div>
                         <div>{max.toLocaleString()}</div>
                     </div>
-                </div>
-                <div>
-                    <div class="flex justify-between font-semibold text-red-500">
-                        <div>Risk</div>
-                        <div>{riskTotal.toLocaleString()}</div>
-                    </div>
-                    {#if $costs[index].plan.risk}
-                    <div class="flex justify-between text-gray-500">
-                        <div>리스크</div>
-                        <div>{risk.toLocaleString()}</div>
-                    </div>
-                    {/if}
-                    {#each $costs[index].risk.customs as risk}
-                        <div class="flex justify-between text-gray-500">
-                            <div>{risk.desc}</div>
-                            <div>{risk.riskAllowance === 0 ? '-' : `₩ ${risk.riskAllowance.toLocaleString()}`}</div>
-                        </div>
-                    {/each}
                 </div>
                 <div>
                     <div class="flex justify-between font-semibold">
@@ -339,6 +323,24 @@
                         </div>
                         <div>{requiredContract.toLocaleString()}</div>
                     </div>
+                </div>
+                <div>
+                    <div class="flex justify-between font-semibold text-red-500">
+                        <div>Risk</div>
+                        <div>{riskTotal.toLocaleString()}</div>
+                    </div>
+                    {#if $costs[index].plan.risk}
+                    <div class="flex justify-between text-gray-500">
+                        <div>건축비용{$costs[index].plan.risk}%</div>
+                        <div>{risk.toLocaleString()}</div>
+                    </div>
+                    {/if}
+                    {#each $costs[index].risk.customs as risk}
+                        <div class="flex justify-between text-gray-500">
+                            <div>{risk.desc}</div>
+                            <div>{risk.riskAllowance.toLocaleString()}</div>
+                        </div>
+                    {/each}
                 </div>
                 <!-- <div>
                     {#each $costs[index].contract.defaults as contract}
