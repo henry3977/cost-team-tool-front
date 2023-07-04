@@ -29,7 +29,6 @@
     });
 
     function setOption() {
-        console.log($costs[index].unitPrice)
         type = $costs[index].plan.type;
         cnstrOption = $costs[index].plan.allContract ? 'contract' : 'ldc';
         if ($costs[index].unitPrice[type][cnstrOption].piloti === undefined) $costs[index].plan.piloti = false;
@@ -60,93 +59,6 @@
         riskTotal = risk + $costs[index].risk.customs.reduce((a, b) => a + b.riskAllowance, 0);
 
         max = support + constructionTotal + contractTotal + riskTotal;
-    }
-
-
-    // function calculators() {
-    //     defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
-    //     if ($costs[index].$costs[index].unitPrice.support === undefined) $costs[index].$costs[index].unitPrice.support = default$costs[index].unitPrice.support;
-    //     if ($costs[index].$costs[index].unitPrice.contract === undefined) $costs[index].$costs[index].unitPrice.contract = default$costs[index].unitPrice.contract;
-    //     if ($costs[index].$costs[index].unitPrice.construction === undefined) $costs[index].$costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
-
-    //     $costs[index].$costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
-    //     $costs[index].support.min = 0;
-    //     $costs[index].support.max = 0;
-    //     if ($costs[index].plan.type !== 'lease') {
-    //         $costs[index].support.min = $costs[index].plan.allContract 
-    //             ? Math.round($costs[index].plan.weeks * $costs[index].$costs[index].unitPrice.support.contract)
-    //             : Math.round($costs[index].plan.weeks * $costs[index].$costs[index].unitPrice.support.ldc);
-    //         $costs[index].support.max = Math.round($costs[index].support.min * ($costs[index].$costs[index].unitPrice.support.maxRate / 100));
-    //     }
-
-    //     $costs[index].construction.building = 0;
-    //     $costs[index].construction.site = 0;
-    //     if (!$costs[index].plan.allContract) {
-    //         $costs[index].construction.building = Math.round($costs[index].plan.buildingArea * $costs[index].$costs[index].unitPrice.construction.building);
-    //         $costs[index].construction.site = Math.round($costs[index].plan.siteArea * $costs[index].$costs[index].unitPrice.construction.site);
-    //     }
-
-    //     $costs[index].contract.defaults = [];
-    //     if ($costs[index].plan.type === 'lease') {
-    //         $costs[index].contract.defaults.push({
-    //             name: '상가 내부 인테리어',
-    //             min: Math.round($costs[index].$costs[index].unitPrice.construction.min * $costs[index].plan.buildingArea),
-    //             max: Math.round($costs[index].$costs[index].unitPrice.construction.max * $costs[index].plan.buildingArea)
-    //         });
-    //     } else {
-    //         $costs[index].contract.defaults.push({
-    //             name: '전기 통신 소방',
-    //             min: Math.round($costs[index].plan.buildingArea * $costs[index].$costs[index].unitPrice.construction.elect),
-    //             max: Math.round($costs[index].plan.buildingArea * $costs[index].$costs[index].unitPrice.construction.elect * ($costs[index].$costs[index].unitPrice.contract.electMaxRate / 100))
-    //         });
-    //         if ($costs[index].plan.allContract) {
-    //             let constructionTotal = Math.round($costs[index].plan.buildingArea * $costs[index].$costs[index].unitPrice.construction.building) + Math.round($costs[index].plan.siteArea * $costs[index].$costs[index].unitPrice.construction.site);
-    //             $costs[index].contract.defaults.push({
-    //                 name: '건축',
-    //                 min: Math.round(constructionTotal * ($costs[index].$costs[index].unitPrice.contract.minRate / 100)),
-    //                 max: Math.round(constructionTotal * ($costs[index].$costs[index].unitPrice.contract.maxRate / 100))
-    //             });
-    //         }
-    //     }
-    //     let costContractMinTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.min, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.min, 0);
-    //     let costContractMaxTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.max, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.max, 0);
-
-    //     if ($costs[index].plan.type === 'lease') $costs[index].risk.contract = {};
-    //     if ($costs[index].plan.type !== 'lease' && Object.keys($costs[index].risk.contract).length === 0) {
-    //         $costs[index].risk.contract = {
-    //             id: 'contract',
-    //             desc: '도급 계약 관리',
-    //             probability: 3,
-    //             impact: 3,
-    //             min: Math.round(costContractMinTotal * 0.1),
-    //             max: Math.round(costContractMaxTotal * 0.1),
-    //             riskAllowance: Math.round( ((Math.round(costContractMinTotal * 0.1) + Math.round(costContractMaxTotal * 0.1)) / 2) * ((9) / 10) )
-    //         };
-    //     }
-    //     if (Object.keys($costs[index].risk.contract).length !== 0) {
-    //         $costs[index].risk.contract.min = Math.round(costContractMinTotal * 0.1);
-    //         $costs[index].risk.contract.max = Math.round(costContractMaxTotal * 0.1);
-    //         $costs[index].risk.contract.riskAllowance = Math.round(
-    //             (($costs[index].risk.contract.min + $costs[index].risk.contract.max) / 2) * (($costs[index].risk.contract.probability * $costs[index].risk.contract.impact) / 10) );
-    //     }
-    //     $costs[index].risk.customs.forEach(risk => {
-    //         risk.riskAllowance = Math.round( ((risk.min + risk.max) / 2) * ((risk.probability * risk.impact) / 10) );
-    //     });
-
-    //     $costs[index].minTotal = 0;
-    //     $costs[index].maxTotal = 0;
-    //     $costs[index].minTotal = $costs[index].support.min + costContractMinTotal;
-    //     $costs[index].maxTotal = $costs[index].support.max + costContractMaxTotal + getRiskTotal($costs[index].risk);
-    //     if (!$costs[index].plan.allContract) {
-    //         $costs[index].minTotal = $costs[index].minTotal + $costs[index].construction.building + $costs[index].construction.site;
-    //         $costs[index].maxTotal = $costs[index].maxTotal + $costs[index].construction.building + $costs[index].construction.site;
-    //     }
-    //     pleaseSetProjects();
-    // }
-
-    function getRiskTotal(risk) {
-        let riskTotal = Object.keys($costs[index].risk.contract).length !== 0 ? risk.contract.riskAllowance : 0;
-        return riskTotal + risk.customs.reduce((a, b) => a + b.riskAllowance, 0);
     }
 
     function pleaseDeleteMe() {
@@ -182,7 +94,6 @@
                 <option value="new">신축</option>
                 <option value="major">개축</option>
                 <option value="store">상가</option>
-                <!-- <option value="lease">임대</option> -->
             </select>
         </div>
 
@@ -208,14 +119,6 @@
                 </div>
                 {/if}
             </div>
-            <!-- <div class="flex justify-between items-end">
-                <label for="comment-{index}">비고</label>
-                <input type="text" id="comment-{index}"
-                    bind:value={$costs[index].plan.comment}
-                    class="px-2 text-right                     
-                        text-cyan-500 text-lg
-                        border-b focus:outline-none focus:border-b focus:border-gray-400">
-            </div> -->
             <div class="flex justify-between items-end">
                 <label for="building-area-{index}">건축 면적</label>
                 <input type="number" id="building-area-{index}"
@@ -343,20 +246,6 @@
                         </div>
                     {/each}
                 </div>
-                <!-- <div>
-                    {#each $costs[index].contract.defaults as contract}
-                        <div class="flex justify-between text-gray-500">
-                            <div>{contract.name}</div>
-                            <div></div>
-                        </div>
-                    {/each}
-                    {#each $costs[index].contract.customs as contract}
-                        <div class="flex justify-between text-gray-500">
-                            <div>{contract.name}</div>
-                            <div>{contract.max === null ? '-' : `₩ ${contract.max.toLocaleString()}`}</div>
-                        </div>
-                    {/each}
-                </div> -->
                 <div class="flex justify-end mt-4">
                     <button class="p-1 rounded-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 cursor-pointer pdf-hide"
                         class:bg-gray-200={selectedIndex == index}

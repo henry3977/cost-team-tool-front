@@ -17,25 +17,10 @@
         }];
     }
 
-    function addContract() {
-        $costs[index].contract.customs = [...$costs[index].contract.customs, {
-            name: 'New Contract',
-            min: null,
-            max: null
-        }];
-    }
-
     function deleteRisk(i) {
         if ($costs[index].risk.customs.length > 0) {
             $costs[index].risk.customs.splice(i, 1);
             $costs[index].risk.customs = $costs[index].risk.customs;
-        }
-    }
-
-    function deleteContract(i) {
-        if ($costs[index].contract.customs.length > 0) {
-            $costs[index].contract.customs.splice(i, 1);
-            $costs[index].contract.customs = $costs[index].contract.customs;
         }
     }
 

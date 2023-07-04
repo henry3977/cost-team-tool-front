@@ -33,40 +33,6 @@
             </div>
         </div>
 
-        <!-- <div class="py-4">
-            <h3 class="font-bold">도급 증가율</h3>
-            <div class="mt-1 flex justify-between items-end">
-                <label class="ml-1 text-xs" for="support-amount">최소</label>
-                <div>
-                    <input type="number"
-                        id="support-amount"
-                        bind:value={defaultUnitPrice.contract.minRate}
-                        class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm">
-                    <span class="text-xs">%</span>
-                </div>
-            </div>
-            <div class="mt-1 flex justify-between items-end">
-                <label class="ml-1 text-xs" for="support-amount">최대</label>
-                <div>
-                    <input type="number"
-                        id="support-amount"
-                        bind:value={defaultUnitPrice.contract.maxRate}
-                        class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm">
-                    <span class=" text-xs">%</span>
-                </div>
-            </div>
-            <div class="mt-1 flex justify-between items-end">
-                <label class="ml-1 text-xs" for="support-max-rate">전,통,소 최대</label>
-                <div>
-                    <input type="number"
-                        id="support-max-rate"
-                        bind:value={defaultUnitPrice.contract.electMaxRate}
-                        class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm">
-                    <span class="text-xs">%</span>
-                </div>
-            </div>
-        </div> -->
-
         <div class="py-4">
             <h3 class="font-bold">신축</h3>
             <div class="flex justify-between items-end">
@@ -266,88 +232,6 @@
                 </div>
             </div>
         </div>
-<!-- 
-        <div class="py-4">
-            <h3 class="font-bold">개축</h3>
-            <div class="mt-1 flex justify-between items-end">
-                <label class="ml-1 text-xs" for="support-amount">건축</label>
-                <div>
-                    <input type="number"
-                        id="support-amount"
-                        bind:value={defaultUnitPrice.major.building}
-                        class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm">
-                    <span class="text-xs">₩</span>
-                </div>
-            </div>
-            <div class="mt-1 flex justify-between items-end">
-                <label class="ml-1 text-xs" for="support-amount">부지</label>
-                <div>
-                    <input type="number"
-                        id="support-amount"
-                        bind:value={defaultUnitPrice.major.site}
-                        class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm">
-                    <span class=" text-xs">₩</span>
-                </div>
-            </div>
-            <div class="mt-1 flex justify-between items-end">
-                <label class="ml-1 text-xs" for="support-max-rate">전,통,소</label>
-                <div>
-                    <input type="number"
-                        id="support-max-rate"
-                        bind:value={defaultUnitPrice.major.elect}
-                        class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm">
-                    <span class="text-xs">₩</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="py-4">
-            <h3 class="font-bold">상가</h3>
-            <div class="mt-1 flex justify-between items-end">
-                <label class="ml-1 text-xs" for="support-amount">건축</label>
-                <div>
-                    <input type="number"
-                        id="support-amount"
-                        bind:value={defaultUnitPrice.store.building}
-                        class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm">
-                    <span class="text-xs">₩</span>
-                </div>
-            </div>
-            <div class="mt-1 flex justify-between items-end">
-                <label class="ml-1 text-xs" for="support-max-rate">전,통,소</label>
-                <div>
-                    <input type="number"
-                        id="support-max-rate"
-                        bind:value={defaultUnitPrice.store.elect}
-                        class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm">
-                    <span class="text-xs">₩</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="py-4">
-            <h3 class="font-bold">임대</h3>
-            <div class="mt-1 flex justify-between items-end">
-                <label class="ml-1 text-xs" for="support-amount">최소</label>
-                <div>
-                    <input type="number"
-                        id="support-amount"
-                        bind:value={defaultUnitPrice.lease.min}
-                        class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm">
-                    <span class=" text-xs">₩</span>
-                </div>
-            </div>
-            <div class="mt-1 flex justify-between items-end">
-                <label class="ml-1 text-xs" for="support-max-rate">최대</label>
-                <div>
-                    <input type="number"
-                        id="support-max-rate"
-                        bind:value={defaultUnitPrice.lease.max}
-                        class="px-1 h-5 text-xs text-right ring-[0.5px] ring-gray-400 rounded-sm">
-                    <span class="text-xs">₩</span>
-                </div>
-            </div>
-        </div> -->
     </div>
     <div class="py-4">
         <button class="px-4 py-1 rounded-lg
