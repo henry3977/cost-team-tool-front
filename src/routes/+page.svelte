@@ -53,49 +53,11 @@
             requiredContract: 330000
         }
     }
-    // let defaultUnitPrice = {
-    //     support: {
-    //         ldc: 8000000,
-    //         contract: 3540000,
-    //         maxRate:104.3
-    //     },
-    //     contract: {
-    //         minRate: 150,
-    //         maxRate: 165,
-    //         electMaxRate: 120
-    //     },
-    //     new: {
-    //         building: 991968,
-    //         site: 178787,
-    //         elect: 580000
-    //     },
-    //     major: {
-    //         building: 732758.87,
-    //         site: 227171.45,
-    //         elect: 300000
-    //     },
-    //     store: {
-    //         building: 830734,
-    //         site: 0,
-    //         elect: 300000
-    //     },
-    //     lease: {
-    //         building: 0,
-    //         site: 0,
-    //         elect: 0,
-    //         min: 936944,
-    //         max: 1516164
-    //     }
-    // }
 
     onMount(() => {
         if (localStorage.getItem('defaultUnitPrice') === null) localStorage.setItem('defaultUnitPrice', JSON.stringify(defaultUnitPrice));
-        if (localStorage.getItem('projects') === null) localStorage.setItem('projects', JSON.stringify([]));
-        if (localStorage.getItem('projects') === null) newProject('새 프로젝트');
-		projects = JSON.parse(localStorage.getItem('projects'));
+		projects = localStorage.getItem('projects') !== null ? JSON.parse(localStorage.getItem('projects')) : [];
         if (projects.length === 0) newProject('새 프로젝트');
-        selProjectIdx = projects.length - 1;
-        costs.update(n => n = projects[selProjectIdx].costs);
 	});
 
     afterUpdate(() => {
@@ -104,9 +66,9 @@
 
     function getDefaultCost() {
         return {
+            id: `${projects[selProjectIdx].id}-${$costs.length + 1}`,
             plan: {
                 type:'new',
-                // comment: null,
                 buildingArea: null,
                 siteArea: null,
                 weeks: null,
@@ -115,7 +77,6 @@
                 piloti: false,
                 floorArea: null,
                 risk: null
-
             },
             contract: {
                 defaults: [],
@@ -136,7 +97,7 @@
         if ($costs[event.detail.index].plan.buildingArea 
             || $costs[event.detail.index].plan.siteArea 
             || $costs[event.detail.index].plan.weeks) {
-            result = confirm('삭제할거야?');
+            result = confirm('삭제할까요?');
         } 
         if (result) {
             $costs.splice(event.detail.index, 1);
@@ -160,24 +121,26 @@
     function newProject(name = null) {
         if (name === null) name = prompt('프로젝트 이름', '새 프로젝트');
         if (name === '') {
-            alert('무엇이든 입력해야 해');
+            alert('무엇이든 입력해야 합니다.');
             return;
         }
 
         if (name !== null) {
             const project = {
+                id: projects.length + 1,
                 name,
-                costs: [getDefaultCost()]
+                costs: []
             }
             projects = [...projects, project];
             setProject(projects.length - 1);
+            newCost();
         }
     }
 
     function setProjectName(projectIdx) {
         const name = prompt('프로젝트 이름', projects[projectIdx].name);
         if (name !== null) projects[projectIdx].name = name;
-        if (name === '') alert('무엇이든 입력해야 해');
+        if (name === '') alert('무엇이든 입력해야 합니다.');
     }
 
     function selProject(projectIdx) {
@@ -191,7 +154,7 @@
     function setProject(projectIdx) {
         let projectCosts = [];
         selProjectIdx = projectIdx;
-        if (selProjectIdx !== null) projectCosts = projects[selProjectIdx].costs;
+        projectCosts = projects[selProjectIdx].costs;
         costs.update(n => n = projectCosts);
         selectedIndex = null;
     }
@@ -206,7 +169,7 @@
     }
 
     function setProjects() {
-        if (selProjectIdx !== null) projects[selProjectIdx].costs = $costs;
+        projects[selProjectIdx].costs = $costs;
         localStorage.setItem('projects', JSON.stringify(projects));
     }
 
@@ -292,7 +255,7 @@
     </div>
     <div class="flex h-[calc(100vh-2.25rem)]">
         <div class="grow overflow-auto flex" id="calculators">
-            {#each $costs as cost, index (index)}
+            {#each $costs as cost, index (cost.id)}
                 <Calculator {index}
                     {selectedIndex}
                     on:pleasesetProjects={setProjects}

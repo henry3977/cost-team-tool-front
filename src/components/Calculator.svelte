@@ -29,6 +29,7 @@
     });
 
     function setOption() {
+        console.log($costs[index].unitPrice)
         type = $costs[index].plan.type;
         cnstrOption = $costs[index].plan.allContract ? 'contract' : 'ldc';
         if ($costs[index].unitPrice[type][cnstrOption].piloti === undefined) $costs[index].plan.piloti = false;
