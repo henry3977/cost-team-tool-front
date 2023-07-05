@@ -14,46 +14,54 @@
     let defaultUnitPrice = {
         support: {
             ldc: 8000000,
-            contract: 3540000,
-            maxRate:104.3
-        },
-        contract: {
-            minRate: 150,
-            maxRate: 165,
-            electMaxRate: 120
+            contract: 3600000
         },
         new: {
-            building: 991968,
-            site: 178787,
-            elect: 580000
+            ldc: {
+                building: 991968,
+                piloti: 534995,
+                site: 137976,
+                siteDemolition: 40811
+            },
+            contract: {
+                building: 1636747,
+                piloti: 882641.75,
+                site: 190000,
+                siteDemolition: 39000
+            },
+            requiredContract: 600000
         },
         major: {
-            building: 732758.87,
-            site: 227171.45,
-            elect: 300000
+            ldc: {
+                building: 732758.87,
+                site: 227171.45,
+            },
+            contract: {
+                building: 1209052.1355,
+                site: 250000,
+
+            },
+            requiredContract: 330000
         },
         store: {
-            building: 830734,
-            site: 0,
-            elect: 300000
-        },
-        lease: {
-            building: 0,
-            site: 0,
-            elect: 0,
-            min: 936944,
-            max: 1516164
+            ldc: {
+                building: 830734
+            },
+            contract: {
+                building: 1370711.1
+            },
+            requiredContract: 330000
         }
     }
 
     onMount(() => {
         if (localStorage.getItem('defaultUnitPrice') === null) localStorage.setItem('defaultUnitPrice', JSON.stringify(defaultUnitPrice));
-        if (localStorage.getItem('projects') === null) localStorage.setItem('projects', JSON.stringify([]));
-        if (localStorage.getItem('projects') === null) newProject('새 프로젝트');
-		projects = JSON.parse(localStorage.getItem('projects'));
-        if (projects.length === 0) newProject('새 프로젝트');
-        selProjectIdx = projects.length - 1;
-        costs.update(n => n = projects[selProjectIdx].costs);
+        if (localStorage.getItem('projects') !== null) projects = JSON.parse(localStorage.getItem('projects'));
+        if (projects.length === 0) {
+            newProject('새 프로젝트');
+        } else {
+            setProject(projects.length - 1);
+        }
 	});
 
     afterUpdate(() => {
@@ -61,35 +69,28 @@
     });
 
     function getDefaultCost() {
+        let costsId = 1;
+        if ($costs.length !== 0) costsId = parseInt($costs[$costs.length - 1].id.substr(2, 1)) + 1;
         return {
-            unitPrice: {},
+            id: `${projects[selProjectIdx].id}-${costsId}`,
             plan: {
                 type:'new',
-                comment: null,
                 buildingArea: null,
                 siteArea: null,
                 weeks: null,
-                allContract: false
-            },
-            support: {
-                min: 0,
-                max: 0
-            },
-            construction: {
-                building: 0,
-                site: 0
+                allContract: false,
+                rebuild: false,
+                piloti: false,
+                floorArea: null,
+                risk: null
             },
             contract: {
                 defaults: [],
                 customs: []
             },
             risk: {
-                contract: {},
                 customs: []
-            },
-
-            minTotal: 0,
-            maxTotal: 0
+            }
         };
     }
 
@@ -102,7 +103,7 @@
         if ($costs[event.detail.index].plan.buildingArea 
             || $costs[event.detail.index].plan.siteArea 
             || $costs[event.detail.index].plan.weeks) {
-            result = confirm('삭제할거야?');
+            result = confirm('삭제할까요?');
         } 
         if (result) {
             $costs.splice(event.detail.index, 1);
@@ -126,24 +127,26 @@
     function newProject(name = null) {
         if (name === null) name = prompt('프로젝트 이름', '새 프로젝트');
         if (name === '') {
-            alert('무엇이든 입력해야 해');
+            alert('무엇이든 입력해야 합니다.');
             return;
         }
 
         if (name !== null) {
             const project = {
+                id: projects.length + 1,
                 name,
-                costs: [getDefaultCost()]
+                costs: []
             }
             projects = [...projects, project];
             setProject(projects.length - 1);
+            newCost();
         }
     }
 
     function setProjectName(projectIdx) {
         const name = prompt('프로젝트 이름', projects[projectIdx].name);
         if (name !== null) projects[projectIdx].name = name;
-        if (name === '') alert('무엇이든 입력해야 해');
+        if (name === '') alert('무엇이든 입력해야 합니다.');
     }
 
     function selProject(projectIdx) {
@@ -155,10 +158,8 @@
     }    
     
     function setProject(projectIdx) {
-        let projectCosts = [];
         selProjectIdx = projectIdx;
-        if (selProjectIdx !== null) projectCosts = projects[selProjectIdx].costs;
-        costs.update(n => n = projectCosts);
+        costs.update(n => n = projects[selProjectIdx].costs);
         selectedIndex = null;
     }
 
@@ -172,7 +173,7 @@
     }
 
     function setProjects() {
-        if (selProjectIdx !== null) projects[selProjectIdx].costs = $costs;
+        projects[selProjectIdx].costs = $costs;
         localStorage.setItem('projects', JSON.stringify(projects));
     }
 
@@ -189,16 +190,17 @@
                 element.classList.toggle('hidden');
             });
             const imgData = canvas.toDataURL('image/png');
+            let orientation = 'l';
+            if (canvas.height > canvas.width) orientation = 'p';
             const doc = new jsPDF({
-                orientation: 'l', // landscape
-                unit: 'pt', // points, pixels won't work properly
+                orientation, // PDF 용지 방향
+                unit: 'px', // points, pixels won't work properly
                 format: [canvas.width, canvas.height] // set needed dimensions for any element
             });
             doc.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
             doc.save(`${projects[selProjectIdx].name}_${new Date().toISOString().slice(0,10).replaceAll('-','')}.pdf`);
         });
     }
-
 </script>
 
 <div class="h-screen">
@@ -257,10 +259,9 @@
     </div>
     <div class="flex h-[calc(100vh-2.25rem)]">
         <div class="grow overflow-auto flex" id="calculators">
-            {#each $costs as cost, index (index)}
+            {#each $costs as cost, index (cost.id)}
                 <Calculator {index}
                     {selectedIndex}
-                    on:pleasesetProjects={setProjects}
                     on:pleaseDeleteMe={deleteCosts}
                     on:pleaseEditCost={editCost}/>
             {/each}

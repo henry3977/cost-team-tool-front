@@ -1,113 +1,64 @@
 <script>
-    import { onMount, afterUpdate } from 'svelte';
+    import { afterUpdate } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
     import { costs } from '../stores.js';
 
 	const dispatch = createEventDispatcher();
     export let index;
     export let selectedIndex;
-    export let defaultUnitPrice;
+    let type = '';
+    let cnstrOption = '';
+    let support = 0;
+    let building = 0;
+    let piloti = 0;
+    let site = 0;
+    let siteDemolition = 0;
+    let requiredContract = 0;
+    let risk = 0;
+    let contractTotal = 0;
+    let constructionTotal = 0;
+    let riskTotal = 0;
+    let max = 0;
 
-    onMount(() => {
-        defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
-        if ($costs[index].unitPrice.support === undefined) $costs[index].unitPrice.support = defaultUnitPrice.support;
-        if ($costs[index].unitPrice.contract === undefined) $costs[index].unitPrice.contract = defaultUnitPrice.contract;
-        if ($costs[index].unitPrice.construction === undefined) $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
-	});
+    if ($costs[index].unitPrice === undefined) $costs[index].unitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
+    setOption();
 
     afterUpdate(() => {
+        setOption();
         if ($costs[index].plan.buildingArea || $costs[index].plan.siteArea || $costs[index].plan.weeks) calculators();
     });
 
-    $: constructionTotal = $costs[index].construction.building + $costs[index].construction.site;
-    $: contractMinTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.min, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.min, 0);
-    $: contractMaxTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.max, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.max, 0);
-    $: riskTotal = getRiskTotal($costs[index].risk);
+    function setOption() {
+        type = $costs[index].plan.type;
+        cnstrOption = $costs[index].plan.allContract ? 'contract' : 'ldc';
+        if ($costs[index].unitPrice[type][cnstrOption].piloti === undefined) $costs[index].plan.piloti = false;
+        if ($costs[index].unitPrice[type][cnstrOption].siteDemolition === undefined) $costs[index].plan.rebuild = false;
+    }
 
     function calculators() {
-        defaultUnitPrice = JSON.parse(localStorage.getItem('defaultUnitPrice'));
-        if ($costs[index].unitPrice.support === undefined) $costs[index].unitPrice.support = defaultUnitPrice.support;
-        if ($costs[index].unitPrice.contract === undefined) $costs[index].unitPrice.contract = defaultUnitPrice.contract;
-        if ($costs[index].unitPrice.construction === undefined) $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
+        support = Math.floor($costs[index].plan.weeks * $costs[index].unitPrice.support[cnstrOption]);
+        building = Math.floor($costs[index].plan.buildingArea * $costs[index].unitPrice[type][cnstrOption].building);
+        site = $costs[index].unitPrice[type][cnstrOption].site !== undefined
+            ? Math.floor($costs[index].plan.siteArea * $costs[index].unitPrice[type][cnstrOption].site)
+            : 0;
+        piloti = $costs[index].plan.piloti
+            ? Math.floor($costs[index].plan.floorArea * $costs[index].unitPrice[type][cnstrOption].piloti)
+            : 0;
+        siteDemolition = $costs[index].plan.rebuild
+            ? Math.floor($costs[index].plan.siteArea * $costs[index].unitPrice[type][cnstrOption].siteDemolition)
+            : 0;
+        requiredContract = Math.floor($costs[index].plan.buildingArea * $costs[index].unitPrice[type].requiredContract);
 
-        $costs[index].unitPrice.construction = defaultUnitPrice[$costs[index].plan.type];
-        $costs[index].support.min = 0;
-        $costs[index].support.max = 0;
-        if ($costs[index].plan.type !== 'lease') {
-            $costs[index].support.min = $costs[index].plan.allContract 
-                ? Math.round($costs[index].plan.weeks * $costs[index].unitPrice.support.contract)
-                : Math.round($costs[index].plan.weeks * $costs[index].unitPrice.support.ldc);
-            $costs[index].support.max = Math.round($costs[index].support.min * ($costs[index].unitPrice.support.maxRate / 100));
-        }
-
-        $costs[index].construction.building = 0;
-        $costs[index].construction.site = 0;
-        if (!$costs[index].plan.allContract) {
-            $costs[index].construction.building = Math.round($costs[index].plan.buildingArea * $costs[index].unitPrice.construction.building);
-            $costs[index].construction.site = Math.round($costs[index].plan.siteArea * $costs[index].unitPrice.construction.site);
-        }
-
-        $costs[index].contract.defaults = [];
-        if ($costs[index].plan.type === 'lease') {
-            $costs[index].contract.defaults.push({
-                name: '상가 내부 인테리어',
-                min: Math.round($costs[index].unitPrice.construction.min * $costs[index].plan.buildingArea),
-                max: Math.round($costs[index].unitPrice.construction.max * $costs[index].plan.buildingArea)
-            });
-        } else {
-            $costs[index].contract.defaults.push({
-                name: '전기 통신 소방',
-                min: Math.round($costs[index].plan.buildingArea * $costs[index].unitPrice.construction.elect),
-                max: Math.round($costs[index].plan.buildingArea * $costs[index].unitPrice.construction.elect * ($costs[index].unitPrice.contract.electMaxRate / 100))
-            });
-            if ($costs[index].plan.allContract) {
-                let constructionTotal = Math.round($costs[index].plan.buildingArea * $costs[index].unitPrice.construction.building) + Math.round($costs[index].plan.siteArea * $costs[index].unitPrice.construction.site);
-                $costs[index].contract.defaults.push({
-                    name: '건축',
-                    min: Math.round(constructionTotal * ($costs[index].unitPrice.contract.minRate / 100)),
-                    max: Math.round(constructionTotal * ($costs[index].unitPrice.contract.maxRate / 100))
-                });
-            }
-        }
-        let costContractMinTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.min, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.min, 0);
-        let costContractMaxTotal = $costs[index].contract.defaults.reduce((a, b) => a + b.max, 0) + $costs[index].contract.customs.reduce((a, b) => a + b.max, 0);
-
-        if ($costs[index].plan.type === 'lease') $costs[index].risk.contract = {};
-        if ($costs[index].plan.type !== 'lease' && Object.keys($costs[index].risk.contract).length === 0) {
-            $costs[index].risk.contract = {
-                id: 'contract',
-                desc: '도급 계약 관리',
-                probability: 3,
-                impact: 3,
-                min: Math.round(costContractMinTotal * 0.1),
-                max: Math.round(costContractMaxTotal * 0.1),
-                riskAllowance: Math.round( ((Math.round(costContractMinTotal * 0.1) + Math.round(costContractMaxTotal * 0.1)) / 2) * ((9) / 10) )
-            };
-        }
-        if (Object.keys($costs[index].risk.contract).length !== 0) {
-            $costs[index].risk.contract.min = Math.round(costContractMinTotal * 0.1);
-            $costs[index].risk.contract.max = Math.round(costContractMaxTotal * 0.1);
-            $costs[index].risk.contract.riskAllowance = Math.round(
-                (($costs[index].risk.contract.min + $costs[index].risk.contract.max) / 2) * (($costs[index].risk.contract.probability * $costs[index].risk.contract.impact) / 10) );
-        }
         $costs[index].risk.customs.forEach(risk => {
             risk.riskAllowance = Math.round( ((risk.min + risk.max) / 2) * ((risk.probability * risk.impact) / 10) );
         });
 
-        $costs[index].minTotal = 0;
-        $costs[index].maxTotal = 0;
-        $costs[index].minTotal = $costs[index].support.min + costContractMinTotal;
-        $costs[index].maxTotal = $costs[index].support.max + costContractMaxTotal + getRiskTotal($costs[index].risk);
-        if (!$costs[index].plan.allContract) {
-            $costs[index].minTotal = $costs[index].minTotal + $costs[index].construction.building + $costs[index].construction.site;
-            $costs[index].maxTotal = $costs[index].maxTotal + $costs[index].construction.building + $costs[index].construction.site;
-        }
-        pleaseSetProjects();
-    }
+        constructionTotal = building + site + piloti + siteDemolition;
+        contractTotal = requiredContract;
+        risk = Math.floor( ($costs[index].plan.risk / 100) * (constructionTotal + contractTotal) );
+        riskTotal = risk + $costs[index].risk.customs.reduce((a, b) => a + b.riskAllowance, 0);
 
-    function getRiskTotal(risk) {
-        let riskTotal = Object.keys($costs[index].risk.contract).length !== 0 ? risk.contract.riskAllowance : 0;
-        return riskTotal + risk.customs.reduce((a, b) => a + b.riskAllowance, 0);
+        max = support + constructionTotal + contractTotal + riskTotal;
     }
 
     function pleaseDeleteMe() {
@@ -121,15 +72,10 @@
 			index: index
 		});
     }
-
-    function pleaseSetProjects() {
-        dispatch('pleaseSetProjects');
-    }
-
 </script>
 
 <div class="shrink-0 w-80 border-r overflow-auto">
-    <div class="p-4 relative">
+    <div class="p-4 relative h-64">
         <button class="cursor-pointer absolute top-2 right-2 p-1 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-full pdf-hide"
             on:click={pleaseDeleteMe}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
@@ -138,161 +84,160 @@
         </button>
         <div class="text-center text-2xl font-semibold">
             <select class="appearance-none text-2xl font-semibold"
+                name="type"
                 bind:value={$costs[index].plan.type}>
                 <option value="new">신축</option>
                 <option value="major">개축</option>
                 <option value="store">상가</option>
-                <option value="lease">임대</option>
             </select>
         </div>
-        <div class="flex flex-col gap-y-1 mt-4 text-sm font-semibold">
-            <div class="flex justify-between items-end">
-                <label for="building-area-{index}">비고</label>
-                <input type="text" id="building-area-{index}"
-                    bind:value={$costs[index].plan.comment}
-                    class="px-2 mt-1 text-right                     
-                        text-cyan-500 text-lg
-                        border-b focus:outline-none focus:border-b focus:border-gray-400">
+
+        <div class="flex flex-col text-sm font-semibold">
+            <div class="py-4 flex items-center justify-between flex-row-reverse gap-x-6">
+                <div class="flex items-center">
+                    <input type="checkbox" id="all-contract-{index}" class="w-4 h-4"
+                        bind:checked={$costs[index].plan.allContract}> 
+                    <label for="all-contract-{index}" class="ml-1">전체도급</label>
+                </div>
+                {#if $costs[index].unitPrice[type][cnstrOption].piloti !== undefined}
+                <div class="flex items-center">
+                    <input type="checkbox" id="piloti-{index}" class="w-4 h-4"
+                        bind:checked={$costs[index].plan.piloti}> 
+                    <label for="piloti-{index}" class="ml-1">필로티</label>
+                </div>
+                {/if}
+                {#if $costs[index].unitPrice[type][cnstrOption].siteDemolition !== undefined}
+                <div class="flex items-center">
+                    <input type="checkbox" id="rebuild-{index}" class="w-4 h-4"
+                        bind:checked={$costs[index].plan.rebuild}> 
+                    <label for="rebuild-{index}" class="ml-1">재건축</label>
+                </div>
+                {/if}
             </div>
             <div class="flex justify-between items-end">
                 <label for="building-area-{index}">건축 면적</label>
                 <input type="number" id="building-area-{index}"
                     bind:value={$costs[index].plan.buildingArea}
-                    class="w-28 px-2 mt-1 text-right                     
-                        text-cyan-500 text-lg
+                    placeholder="제곱미터"
+                    class="w-28 px-2 text-right text-base
                         border-b focus:outline-none focus:border-b focus:border-gray-400">
             </div>
-            <div class="flex justify-between items-end h-[32px]">
+            {#if $costs[index].unitPrice[type][cnstrOption].site !== undefined}
+            <div class="flex justify-between items-end">
                 <label for="site-area-{index}">부지 면적</label>
-                {#if $costs[index].plan.type === 'new' || $costs[index].plan.type === 'major'}
-                    <input type="number" id="site-area-{index}"
-                        bind:value={$costs[index].plan.siteArea}
-                        class="w-28 px-2 mt-1 text-right                     
-                            text-cyan-500 text-lg
-                            border-b focus:outline-none focus:border-b focus:border-gray-400">
-                {/if}
+                <input type="number" id="site-area-{index}"
+                    bind:value={$costs[index].plan.siteArea}
+                    placeholder="제곱미터"
+                    class="w-28 px-2 text-right text-base
+                        border-b focus:outline-none focus:border-b focus:border-gray-400">
             </div>
-            <div class="flex justify-between items-end h-[32px]">
+            {/if}
+            {#if $costs[index].plan.piloti}
+            <div class="flex justify-between items-end">
+                <label for="floor-area-{index}">단층 면적</label>
+                <input type="number" id="floor-area-{index}"
+                    bind:value={$costs[index].plan.floorArea}
+                    placeholder="제곱미터"
+                    class="w-28 px-2 text-right text-base
+                        border-b focus:outline-none focus:border-b focus:border-gray-400">
+            </div>
+            {/if}
+            <div class="flex justify-between items-end">
                 <label for="weeks-{index}">공사 기간(주)</label>
-                {#if $costs[index].plan.type !== 'lease'}
-                    <input type="number" id="weeks-{index}"
-                        bind:value={$costs[index].plan.weeks}
-                        class="w-28 px-2 mt-1 text-right                     
-                            text-cyan-500 text-lg
-                            border-b focus:outline-none focus:border-b focus:border-gray-400">
-                {/if}
+                <input type="number" id="weeks-{index}"
+                    bind:value={$costs[index].plan.weeks}
+                    placeholder="주"
+                    class="w-28 px-2 text-right text-base
+                        border-b focus:outline-none focus:border-b focus:border-gray-400">
             </div>
-            <div class="mt-1 flex items-center justify-end h-[20px]">
-                {#if $costs[index].plan.type !== 'lease'}
-                    <input type="checkbox" id="all-contract-{index}" class="w-4 h-4"
-                        bind:checked={$costs[index].plan.allContract}> 
-                    <label for="all-contract-{index}" class="ml-2">전체도급</label>
-                {/if}
+            <div class="flex justify-between items-end">
+                <label for="risk-{index}">리스크(%)</label>
+                <input type="number" id="risk-{index}"
+                    bind:value={$costs[index].plan.risk}
+                    placeholder="%"
+                    class="w-28 px-2 text-right text-base
+                        border-b focus:outline-none focus:border-b focus:border-gray-400">
             </div>
         </div>
     </div>
     {#if $costs[index].plan.buildingArea || $costs[index].plan.siteArea || $costs[index].plan.weeks}
-        <div class="p-4 mt-4">
-            <div class="flex flex-col gap-y-3.5 text-sm">
+        <div class="p-4">
+            <div class="flex flex-col gap-y-2 text-sm">
                 <div class="font-semibold">
                     <div class="flex justify-between text-cyan-500 text-lg">
-                        <div>MIN</div>
-                        <div>{$costs[index].minTotal === 0 ? '-' : `₩ ${$costs[index].minTotal.toLocaleString()}`}</div>
-                    </div>
-                    <div class="flex justify-between text-purple-500  text-lg">
                         <div>MAX</div>
-                        <div>{$costs[index].maxTotal === 0 ? '-' : `₩ ${$costs[index].maxTotal.toLocaleString()}`}</div>
+                        <div>{max.toLocaleString()}</div>
                     </div>
                 </div>
-
                 <div>
                     <div class="flex justify-between font-semibold">
-                        <div>Support
-                            <span class="px-1 text-xs text-cyan-500 ring-cyan-500">MIN</span>
-                        </div>
-                        <div>{$costs[index].support.min === 0 ? '-' : `₩ ${$costs[index].support.min.toLocaleString()}`}</div>
-                        
-                    </div>
-                    <div class="flex justify-between font-semibold">
-                        <div>Support
-                            <span class="px-1 text-xs text-purple-500 ring-purple-500">MAX</span>
-                        </div>
-                        <div>{$costs[index].support.max === 0 ? '-' : `₩ ${$costs[index].support.max.toLocaleString()}`}</div>
-                        
+                        <div>Support</div>
+                        <div>{support.toLocaleString()}</div>
                     </div>
                 </div>
                 <div>
                     <div class="flex justify-between font-semibold">
                         <div>Construction</div>
-                        <div>{constructionTotal === 0 ? '-' : `₩ ${constructionTotal.toLocaleString()}`}</div>
+                        <div>{constructionTotal.toLocaleString()}</div>
                     </div>
                     <div class="flex justify-between text-gray-500">
-                        <div>건물 공사</div>
-                        <div>{$costs[index].construction.building === 0 ? '-' : `₩ ${$costs[index].construction.building.toLocaleString()}`}</div>
+                        <div>건물 공사
+                            {#if $costs[index].plan.allContract}
+                                <span class="text-purple-500">(도급)</span>
+                            {/if}
+                        </div>
+                        <div>{building.toLocaleString()}</div>
                     </div>
+                    {#if piloti}
                     <div class="flex justify-between text-gray-500">
-                        <div>부지 공사</div>
-                        <div>{$costs[index].construction.site === 0 ? '-' : `₩ ${$costs[index].construction.site.toLocaleString()}`}</div>
+                        <div>필로티
+                            {#if $costs[index].plan.allContract}
+                                <span class="text-purple-500">(도급)</span>
+                            {/if}
+                        </div>
+                        <div>{piloti.toLocaleString()}</div>
+                    </div>
+                    {/if}
+                    <div class="flex justify-between text-gray-500">
+                        <div>부지 공사
+                            {#if $costs[index].plan.allContract}
+                                <span class="text-purple-500">(도급)</span>
+                            {/if}
+                        </div>
+                        <div>{site.toLocaleString()}</div>
+                    </div>
+                    {#if siteDemolition}
+                    <div class="flex justify-between text-gray-500">
+                        <div>부지 철거
+                            {#if $costs[index].plan.allContract}
+                                <span class="text-purple-500">(도급)</span>
+                            {/if}
+                        </div>
+                        <div>{siteDemolition.toLocaleString()}</div>
+                    </div>
+                    {/if}
+                    <div class="flex justify-between text-gray-500">
+                        <div>전통소 
+                            <span class="text-purple-500">(도급)</span>
+                        </div>
+                        <div>{requiredContract.toLocaleString()}</div>
                     </div>
                 </div>
                 <div>
-                    <div class="flex justify-between font-semibold">
-                        <div>Contract
-                            <span class="px-1 text-xs text-cyan-500 ring-cyan-500">MIN</span>
-                        </div>
-                        <div>{contractMinTotal === 0 ? '-' : `₩ ${contractMinTotal.toLocaleString()}`}</div>
+                    <div class="flex justify-between font-semibold text-red-500">
+                        <div>Risk</div>
+                        <div>{riskTotal.toLocaleString()}</div>
                     </div>
-                    {#each $costs[index].contract.defaults as contract}
-                        <div class="flex justify-between text-gray-500">
-                            <div>{contract.name}</div>
-                            <div>{contract.min === 0 ? '-' : `₩ ${contract.min.toLocaleString()}`}</div>
-                        </div>
-                    {/each}
-                    {#each $costs[index].contract.customs as contract}
-                        <div class="flex justify-between text-gray-500">
-                            <div>{contract.name}</div>
-                            <div>{contract.min === null ? '-' : `₩ ${contract.min.toLocaleString()}`}</div>
-                        </div>
-                    {/each}
-                </div>
-
-                <div>
-                    <div class="flex justify-between font-semibold">
-                        <div>Contract
-                            <span class="px-1 text-xs text-purple-500 ring-purple-500">MAX</span>
-                        </div>
-                        <div>{contractMaxTotal === 0 ? '-' : `₩ ${contractMaxTotal.toLocaleString()}`}</div>
+                    {#if $costs[index].plan.risk}
+                    <div class="flex justify-between text-gray-500">
+                        <div>건축비용{$costs[index].plan.risk}%</div>
+                        <div>{risk.toLocaleString()}</div>
                     </div>
-                    {#each $costs[index].contract.defaults as contract}
-                        <div class="flex justify-between text-gray-500">
-                            <div>{contract.name}</div>
-                            <div>{contract.max === 0 ? '-' : `₩ ${contract.max.toLocaleString()}`}</div>
-                        </div>
-                    {/each}
-                    {#each $costs[index].contract.customs as contract}
-                        <div class="flex justify-between text-gray-500">
-                            <div>{contract.name}</div>
-                            <div>{contract.max === null ? '-' : `₩ ${contract.max.toLocaleString()}`}</div>
-                        </div>
-                    {/each}
-                </div>
-                <div>
-                    <div class="flex justify-between font-semibold">
-                        <div>Risk
-                            <span class="px-1 text-xs text-purple-500 ring-purple-500">MAX</span>
-                        </div>
-                        <div>{riskTotal === 0 ? '-' : `₩ ${riskTotal.toLocaleString()}`}</div>
-                    </div>
-                    {#if Object.keys($costs[index].risk.contract).length !== 0}
-                        <div class="flex justify-between text-gray-500">
-                            <div>{$costs[index].risk.contract.desc}</div>
-                            <div>{$costs[index].risk.contract.riskAllowance === 0 ? '-' : `₩ ${$costs[index].risk.contract.riskAllowance.toLocaleString()}`}</div>
-                        </div>
                     {/if}
                     {#each $costs[index].risk.customs as risk}
                         <div class="flex justify-between text-gray-500">
                             <div>{risk.desc}</div>
-                            <div>{risk.riskAllowance === 0 ? '-' : `₩ ${risk.riskAllowance.toLocaleString()}`}</div>
+                            <div>{risk.riskAllowance.toLocaleString()}</div>
                         </div>
                     {/each}
                 </div>
