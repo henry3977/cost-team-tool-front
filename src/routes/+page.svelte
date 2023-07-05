@@ -58,6 +58,7 @@
         if (localStorage.getItem('defaultUnitPrice') === null) localStorage.setItem('defaultUnitPrice', JSON.stringify(defaultUnitPrice));
 		projects = localStorage.getItem('projects') !== null ? JSON.parse(localStorage.getItem('projects')) : [];
         if (projects.length === 0) newProject('새 프로젝트');
+        if (projects.length !== 0) setProject(projects.length - 1);
 	});
 
     afterUpdate(() => {
@@ -65,8 +66,10 @@
     });
 
     function getDefaultCost() {
+        let costsId = 1;
+        if ($costs.length !== 0) costsId = parseInt($costs[$costs.length - 1].id.substr(2, 1)) + 1;
         return {
-            id: `${projects[selProjectIdx].id}-${$costs.length + 1}`,
+            id: `${projects[selProjectIdx].id}-${costsId}`,
             plan: {
                 type:'new',
                 buildingArea: null,
@@ -152,10 +155,10 @@
     }    
     
     function setProject(projectIdx) {
-        let projectCosts = [];
+        // let projectCosts = [];
         selProjectIdx = projectIdx;
-        projectCosts = projects[selProjectIdx].costs;
-        costs.update(n => n = projectCosts);
+        // projectCosts = projects[selProjectIdx].costs;
+        costs.update(n => n = projects[selProjectIdx].costs);
         selectedIndex = null;
     }
 
