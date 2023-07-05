@@ -56,9 +56,12 @@
 
     onMount(() => {
         if (localStorage.getItem('defaultUnitPrice') === null) localStorage.setItem('defaultUnitPrice', JSON.stringify(defaultUnitPrice));
-		projects = localStorage.getItem('projects') !== null ? JSON.parse(localStorage.getItem('projects')) : [];
-        if (projects.length === 0) newProject('새 프로젝트');
-        if (projects.length !== 0) setProject(projects.length - 1);
+        if (localStorage.getItem('projects') !== null) projects = JSON.parse(localStorage.getItem('projects'));
+        if (projects.length === 0) {
+            newProject('새 프로젝트');
+        } else {
+            setProject(projects.length - 1);
+        }
 	});
 
     afterUpdate(() => {
@@ -155,9 +158,7 @@
     }    
     
     function setProject(projectIdx) {
-        // let projectCosts = [];
         selProjectIdx = projectIdx;
-        // projectCosts = projects[selProjectIdx].costs;
         costs.update(n => n = projects[selProjectIdx].costs);
         selectedIndex = null;
     }
@@ -261,7 +262,6 @@
             {#each $costs as cost, index (cost.id)}
                 <Calculator {index}
                     {selectedIndex}
-                    on:pleasesetProjects={setProjects}
                     on:pleaseDeleteMe={deleteCosts}
                     on:pleaseEditCost={editCost}/>
             {/each}

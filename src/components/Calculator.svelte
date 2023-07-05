@@ -72,11 +72,6 @@
 			index: index
 		});
     }
-
-    function pleaseSetProjects() {
-        dispatch('pleaseSetProjects');
-    }
-
 </script>
 
 <div class="shrink-0 w-80 border-r overflow-auto">
