@@ -56,7 +56,7 @@
     }
 
     onMount(() => {
-        if (checkDefaultUnitPrice())localStorage.setItem('defaultUnitPrice', JSON.stringify(defaultUnitPrice));
+        if (checkDefaultUnitPrice()) localStorage.setItem('defaultUnitPrice', JSON.stringify(defaultUnitPrice));
         if (localStorage.getItem('projects') !== null) projects = JSON.parse(localStorage.getItem('projects'));
         if (projects.length === 0) {
             newProject('새 프로젝트');
