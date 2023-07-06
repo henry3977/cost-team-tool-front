@@ -141,10 +141,11 @@
             alert('무엇이든 입력해야 합니다.');
             return;
         }
-
         if (name !== null) {
+            let projectId = 1;
+            if (projects.length !== 0) projectId = projects[projects.length - 1].id + 1;
             const project = {
-                id: projects.length + 1,
+                id: projectId,
                 name,
                 costs: []
             }
