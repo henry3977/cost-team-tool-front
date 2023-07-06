@@ -12,6 +12,7 @@
     let selProjectIdx = null;
     let projects = [];
     let defaultUnitPrice = {
+        version: 1.0,
         support: {
             ldc: 8000000,
             contract: 3600000
@@ -55,7 +56,7 @@
     }
 
     onMount(() => {
-        if (localStorage.getItem('defaultUnitPrice') === null) localStorage.setItem('defaultUnitPrice', JSON.stringify(defaultUnitPrice));
+        if (checkDefaultUnitPrice())localStorage.setItem('defaultUnitPrice', JSON.stringify(defaultUnitPrice));
         if (localStorage.getItem('projects') !== null) projects = JSON.parse(localStorage.getItem('projects'));
         if (projects.length === 0) {
             newProject('새 프로젝트');
@@ -67,6 +68,19 @@
     afterUpdate(() => {
         setProjects();
     });
+
+    function checkDefaultUnitPrice() {
+        let update = false;
+        let localUnitPrice = JSON.parse(localStorage.getItem('projects'));
+        if (localUnitPrice === null) {
+            update = true;
+        } else if (localUnitPrice.version === undefined) {
+            update = true;
+        } else if (localUnitPrice.version < defaultUnitPrice.version) {
+            update = true;
+        }
+        return update;
+    }
 
     function getDefaultCost() {
         let costsId = 1;
