@@ -169,8 +169,10 @@
     }    
     
     function setProject(projectIdx) {
+        let projectCosts = [];
         selProjectIdx = projectIdx;
-        costs.update(n => n = projects[selProjectIdx].costs);
+        if (selProjectIdx !== null) projectCosts = projects[selProjectIdx].costs;
+        costs.update(n => n = projectCosts);
         selectedIndex = null;
     }
 
@@ -184,7 +186,7 @@
     }
 
     function setProjects() {
-        projects[selProjectIdx].costs = $costs;
+        if (selProjectIdx !== null) projects[selProjectIdx].costs = $costs;
         localStorage.setItem('projects', JSON.stringify(projects));
     }
 
