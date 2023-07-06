@@ -77,6 +77,7 @@
         } else if (localUnitPrice.version === undefined) {
             update = true;
         } else if (localUnitPrice.version < defaultUnitPrice.version) {
+            localStorage.removeItem('projects');
             update = true;
         }
         return update;
@@ -97,10 +98,6 @@
                 piloti: false,
                 floorArea: null,
                 risk: null
-            },
-            contract: {
-                defaults: [],
-                customs: []
             },
             risk: {
                 customs: []
